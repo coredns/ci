@@ -1,0 +1,79 @@
+<html>
+<head>
+    <script type="text/javascript">
+        function createRequestObject() {
+
+            var req;
+
+            if(window.XMLHttpRequest){
+                // Firefox, Safari, Opera...
+                req = new XMLHttpRequest();
+            } else if(window.ActiveXObject) {
+                // Internet Explorer 5+
+                req = new ActiveXObject("Microsoft.XMLHTTP");
+            } else {
+                // There is an error creating the object,
+                // just as an old browser is being used.
+                alert('There was a problem creating the XMLHttpRequest object');
+            }
+            return req;
+        }
+
+        // Make the XMLHttpRequest object
+        var http = createRequestObject();
+
+        function sendRequest() {
+            var pr = getParameterByName("pr")
+            var timestamp = new Date();
+            http.open('get', '/log/'+pr+'.txt?t='+timestamp);
+            http.onreadystatechange = handleResponse;
+            http.send(null);
+        }
+
+        function handleResponse() {
+            if(http.readyState == 4 && http.status == 200){
+                var response = http.responseText;
+                if(response) {
+                    document.getElementById("log").innerHTML = response;
+                    if (document.getElementById("followcheck").checked) {
+                        window.scrollTo(0,document.body.scrollHeight);
+                    }
+                    setTimeout(update,1000);
+                }
+            }
+        }
+
+        function update() {
+            sendRequest();
+        }
+
+        function getParameterByName(name) {
+            var url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        function stopFollow(){
+            // Stop following the log if user scrolls off the bottom of the window
+            if (window.scrollY < document.body.scrollHeight - window.innerHeight){
+                document.getElementById("followcheck").checked = false
+            }
+        }
+        function startFollow(){
+            window.scrollTo(0,document.body.scrollHeight);
+            document.getElementById("followcheck").checked = true
+        }
+
+    </script>
+</head>
+<body onLoad="sendRequest()" onscroll="stopFollow()"/>
+<span style="position:fixed;top:2%;right:2%"> <input type="checkbox"  checked="true" onclick="startFollow()" id="followcheck" title="follow log"/> follow </span>
+<pre>
+<span id="log" name="log"></span>
+</pre>
+</body>
+</html>
