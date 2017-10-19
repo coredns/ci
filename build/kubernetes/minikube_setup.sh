@@ -39,4 +39,5 @@ kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
 # Deploy coredns in place of kube-dns
 kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 
-
+# Start local proxy (for out-of-cluster tests)
+kubectl proxy --port=8080 &
