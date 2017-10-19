@@ -40,4 +40,6 @@ kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
 kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 
 # Start local proxy (for out-of-cluster tests)
-kubectl proxy --port=8080 &
+kubectl proxy --port=8080 2> /dev/null &
+echo -n $! > /var/run/kubectl_proxy.pid
+sleep 3

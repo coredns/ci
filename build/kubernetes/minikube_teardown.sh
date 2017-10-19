@@ -2,6 +2,9 @@
 
 PR=$1
 
+# stop local proxy
+kill -9 `cat /var/run/kubectl_proxy.pid`
+
 # delete minikube instance
 minikube delete
 
