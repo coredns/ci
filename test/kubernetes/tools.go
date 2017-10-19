@@ -20,6 +20,7 @@ import (
 	"time"
 )
 
+// DoIntegrationTest executes a test case
 func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 	digCmd := "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +search +showsearch +time=10 +tries=6"
 
@@ -48,7 +49,7 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 	return results[0], nil
 }
 
-// doIntegrationTests executes test cases
+// DoIntegrationTests executes test cases
 func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
 	err := StartClientPod(namespace)
 	if err != nil {
@@ -66,12 +67,13 @@ func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
 			sort.Sort(test.RRSet(tc.Extra))
 			test.SortAndCheck(t, res, tc)
 			if t.Failed() {
-				t.Errorf("coredns log: %s", corednsLogs())
+				t.Errorf("coredns log: %s", CorednsLogs())
 			}
 		})
 	}
 }
 
+// StartClientPod starts a dns client pod in the namespace
 func StartClientPod(namespace string) error {
 	_, err := kubectl("-n " + namespace + " run " + clientName + " --image=infoblox/dnstools --restart=Never -- -c 'while [ 1 ]; do sleep 100; done'")
 	if err != nil {
@@ -172,14 +174,15 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 		maxWait = maxWait - 1
 		if maxWait == 0 {
 			//println(o)
-			logs := corednsLogs()
+			logs := CorednsLogs()
 			return errors.New("timeout waiting for coredns to be ready. coredns log: " + logs)
 		}
 	}
 	return nil
 }
 
-func corednsLogs() string {
+// CorednsLogs returns the current coredns log
+func CorednsLogs() string {
 	name, _ := kubectl("-n kube-system get pods -l k8s-app=coredns | grep Running | cut -f1 -d' ' | tr -d '\n'")
 	logs, _ := kubectl("-n kube-system logs " + name)
 	return (logs)
