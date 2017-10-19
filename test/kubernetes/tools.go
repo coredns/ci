@@ -20,51 +20,50 @@ import (
 	"time"
 )
 
+func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
+	digCmd := "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +search +showsearch +time=10 +tries=6"
+
+	// attach to client and execute query.
+	var cmdout string
+	tries := 3
+	for {
+		cmdout, err := kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
+		if err == nil {
+			break
+		}
+		tries = tries - 1
+		if tries == 0 {
+			return nil, errors.New("failed to execute query '" + digCmd + "' got error: '" + err.Error() + "'")
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	results, err := ParseDigResponse(cmdout)
+	if err != nil {
+		return nil, errors.New("failed to parse result: (" + err.Error() + ")" + cmdout)
+	}
+	if len(results) != 1 {
+		return nil, errors.New("expected 1 query attempt, observed " + strconv.Itoa(len(results)))
+	}
+	return results[0], nil
+}
+
 // doIntegrationTests executes test cases
 func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
-
-	clientName := "coredns-test-client"
-	err := startClientPod(namespace, clientName)
+	err := StartClientPod(namespace, clientName)
 	if err != nil {
 		t.Fatalf("failed to start client pod: %s", err)
 	}
 	for _, tc := range testCases {
-
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
-
-			digCmd := "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +search +showsearch +time=10 +tries=6"
-
-			// attach to client and execute query.
-			var cmdout string
-			tries := 3
-			for {
-				cmdout, err = kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
-				if err == nil {
-					break
-				}
-				tries = tries - 1
-				if tries == 0 {
-					t.Errorf("failed to execute query '%s' got error: '%s'", digCmd, err)
-				}
-				time.Sleep(500 * time.Millisecond)
-			}
-			results, err := ParseDigResponse(cmdout)
+			res, err := DoIntegrationTest(tc, namespace)
 			if err != nil {
-				t.Errorf("failed to parse result: (%s) '%s'", err, cmdout)
+				t.Errorf(err.Error())
 			}
-			if len(results) != 1 {
-				t.Errorf("expected 1 query attempt, observed %v", len(results))
-			}
-			res := results[0]
-
-			// Before sort and check, make sure that CNAMES do not appear after their target records.
 			test.CNAMEOrder(t, res)
-
 			sort.Sort(test.RRSet(tc.Answer))
 			sort.Sort(test.RRSet(tc.Ns))
 			sort.Sort(test.RRSet(tc.Extra))
 			test.SortAndCheck(t, res, tc)
-
 			if t.Failed() {
 				t.Errorf("coredns log: %s", corednsLogs())
 			}
@@ -72,7 +71,7 @@ func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
 	}
 }
 
-func startClientPod(namespace, clientName string) error {
+func StartClientPod(namespace, clientName string) error {
 	_, err := kubectl("-n " + namespace + " run " + clientName + " --image=infoblox/dnstools --restart=Never -- -c 'while [ 1 ]; do sleep 100; done'")
 	if err != nil {
 		// ignore error (pod already running)
@@ -345,17 +344,19 @@ func invertUint16Map(m map[uint16]string) map[string]uint16 {
 	return n
 }
 
-
 // configmap is the header used for defining the coredns configmap
-const configmap = `apiVersion: v1
+const (
+	configmap = `apiVersion: v1
 kind: ConfigMap
 metadata:
   name: coredns
   namespace: kube-system
 data:`
 
-// ExampleNet is an example upstream zone file
-const ExampleNet = `; example.net. test file for cname tests
+	// ExampleNet is an example upstream zone file
+	ExampleNet = `; example.net. test file for cname tests
 example.net.          IN      SOA     ns.example.net. admin.example.net. 2015082541 7200 3600 1209600 3600
 example.net. IN A 13.14.15.16
 `
+	clientName = "coredns-test-client"
+)
