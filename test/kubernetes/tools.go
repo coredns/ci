@@ -164,7 +164,7 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 		if strings.Contains(o, "Running") {
 			running += 1
 		}
-		if running >= 2 {
+		if running >= 8 {
 			// give coredns a chance to read its config before declaring victory
 			break
 		}
