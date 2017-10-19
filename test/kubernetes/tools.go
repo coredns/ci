@@ -50,7 +50,7 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 
 // doIntegrationTests executes test cases
 func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
-	err := StartClientPod(namespace, clientName)
+	err := StartClientPod(namespace)
 	if err != nil {
 		t.Fatalf("failed to start client pod: %s", err)
 	}
@@ -72,7 +72,7 @@ func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
 	}
 }
 
-func StartClientPod(namespace, clientName string) error {
+func StartClientPod(namespace) error {
 	_, err := kubectl("-n " + namespace + " run " + clientName + " --image=infoblox/dnstools --restart=Never -- -c 'while [ 1 ]; do sleep 100; done'")
 	if err != nil {
 		// ignore error (pod already running)
