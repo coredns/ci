@@ -25,9 +25,10 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 
 	// attach to client and execute query.
 	var cmdout string
+	var err error
 	tries := 3
 	for {
-		cmdout, err := kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
+		cmdout, err = kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
 		if err == nil {
 			break
 		}
