@@ -1,4 +1,4 @@
-test: fetch-pr test-kubernetes
+test: fetch-pr deploy-k8s test-k8s
 
 .PHONY: fetch-pr
 fetch-pr:
@@ -11,8 +11,8 @@ fetch-pr:
 	  git fetch --depth 1 origin pull/${PR}/head:pr-${PR} && \
 	  git checkout pr-${PR}
 
-.PHONY: test-kubernetes
-test-kubernetes:
+.PHONY: deploy-k8s
+deploy-k8s:
 	# Start local docker image repo (k8s must pull images from a repo)
 	-docker run -d -p 5000:5000 --restart=always --name registry registry:2.6.2 || true
 
@@ -26,12 +26,13 @@ test-kubernetes:
 	# Set up minikube
 	-sh ./build/kubernetes/minikube_setup.sh
 
+.PHONY: test-k8s
+test-k8s:
 	# Do tests
-	cd ${GOPATH}/src/${COREDNSPATH}/coredns && \
-	${MAKE} ci
+	go test -v ./test/kubernetes/...
 
-.PHONY: clean-kubernetes
-clean-kubernetes:
+.PHONY: clean-k8s
+clean-k8s:
 	# Clean up
 	-sh ./build/kubernetes/minikube_teardown.sh
 

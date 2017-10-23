@@ -81,7 +81,7 @@ case "${body}" in
 
 	# Set up a finish & clean up on exit
     function finishIntegrationTest {
-        make clean-kubernetes >> /var/www/log/${PR}.txt 2>&1
+        make clean-k8s >> /var/www/log/${PR}.txt 2>&1
         # Post result to pr
         pass=$(cat /var/www/log/${PR}.txt | grep "^\-\-\- PASS:" | wc -l)
         fail=$(cat /var/www/log/${PR}.txt | grep "^\-\-\- FAIL:" | wc -l)
