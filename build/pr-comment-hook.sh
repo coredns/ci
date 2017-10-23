@@ -76,7 +76,7 @@ case "${body}" in
     # Get ci code
     mkdir -p ${GOPATH}/src/${COREDNSPATH}
     cd ${GOPATH}/src/${COREDNSPATH}
-    git clone https://${COREDNSREPO}/ci. git
+    git clone https://${COREDNSREPO}/ci.git
     cd ci
 
 	# Set up a finish & clean up on exit
@@ -96,7 +96,7 @@ case "${body}" in
         | Tests    | %s     | %s     |\\n
         | Subtests | %s     | %s     |\\n' "${pass}" "${fail}" "${subpass}" "${subfail}"
         summary=$(echo $summary | tr -d '\n')
-        updateStatus "Integration test $status. <a href='https://drone.coredns.io/log/view.html?pr=${PR}'>View Log</a> $summary"
+        updateStatus "Integration test $status. Run time ${SECONDS} seconds. <a href='https://drone.coredns.io/log/view.html?pr=${PR}'>View Log</a>$summary"
         rmWorkdir
     }
     trap finishIntegrationTest EXIT
@@ -104,6 +104,7 @@ case "${body}" in
     # Do integration setup and test
     export K8S_VERSION='v1.7.5'
     status="FAIL"
+    SECONDS=0
     make test >> /var/www/log/${PR}.txt 2>&1 && status="PASS"
 
   ;;
