@@ -144,6 +144,31 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: svc-d
+  namespace: test-2
+spec:
+  clusterIP: 10.0.0.121
+  ports:
+  - name: c-port
+    port: 1234
+    protocol: UDP
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: svc-d
+  namespace: test-2
+subsets:
+  - addresses:
+      - ip: 172.17.0.252
+    ports:
+      - port: 1234
+        name: c-port
+        protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: headless-svc
   namespace: test-1
 spec:
