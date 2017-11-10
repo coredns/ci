@@ -10,35 +10,35 @@ import (
 )
 
 var dnsTestCasesPTR = []test.Case{
-	{ // An PTR record query for an existing service should return a record
+	{ // A PTR record query for an existing service should return a record
 		Qname: "100.0.0.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
 			test.PTR("100.0.0.10.in-addr.arpa. 303	IN	PTR	svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
-	{ // An PTR record query for an existing endpoint should return a record
+	{ // A PTR record query for an existing endpoint should return a record
 		Qname: "253.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
 			test.PTR("253.0.17.172.in-addr.arpa. 303	IN	PTR	172-17-0-253.svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
-	{ // An PTR record query for an existing service in an UNEXPOSED namespace should return NODATA
+	{ // A PTR record query for an existing service in an UNEXPOSED namespace should return NODATA
 		Qname: "120.0.0.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Ns: []dns.RR{
 			test.SOA("0.0.10.in-addr.arpa.	303	IN	SOA	ns.dns.0.0.10.in-addr.arpa. hostmaster.0.0.10.in-addr.arpa. 1510339777 7200 1800 86400 30"),
 		},
 	},
-	{ // An PTR record query for an existing endpoint in an UNEXPOSED namespace should return NODATA
+	{ // A PTR record query for an existing endpoint in an UNEXPOSED namespace should return NODATA
 		Qname: "252.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Ns: []dns.RR{
 			test.SOA("0.17.172.in-addr.arpa.	303	IN	SOA	ns.dns.0.17.172.in-addr.arpa. hostmaster.0.17.172.in-addr.arpa. 1510339711 7200 1800 86400 30"),
 		},
 	},
-	{ // An PTR record query for an ip address that is not a service or endpoint should return NODATA
+	{ // A PTR record query for an ip address that is not a service or endpoint should return NODATA
 		Qname: "200.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Ns: []dns.RR{
