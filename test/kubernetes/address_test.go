@@ -17,7 +17,7 @@ var dnsTestCasesA = []test.Case{
 			test.A("svc-1-a.test-1.svc.cluster.local.      5    IN      A       10.0.0.100"),
 		},
 	},
-	{ // An A record query for an existing headless service should return a record for each of its endpoints
+	{ // An A record query for an existing headless service should return a record for each of its ipv4 endpoints
 		Qname: "headless-svc.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
@@ -78,6 +78,14 @@ var dnsTestCasesA = []test.Case{
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
 			test.TXT(`dns-version.cluster.local. 303 IN TXT "1.0.1"`),
+		},
+	},
+	{ // An AAAA record query for an existing headless service should return a record for each of its ipv6 endpoints
+		Qname: "headless-svc.test-1.svc.cluster.local.", Qtype: dns.TypeAAAA,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.AAAA("headless-svc.test-1.svc.cluster.local.      5    IN      AAAA      1234:abcd::1"),
+			test.AAAA("headless-svc.test-1.svc.cluster.local.      5    IN      AAAA      1234:abcd::2"),
 		},
 	},
 }

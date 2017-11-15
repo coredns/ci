@@ -187,6 +187,8 @@ subsets:
   - addresses:
       - ip: 172.17.0.255
       - ip: 172.17.0.254
+      - ip: 1234:abcd::1
+      - ip: 1234:abcd::2
     ports:
       - port: 1234
         name: c-port
