@@ -24,6 +24,13 @@ var dnsTestCasesPTR = []test.Case{
 			test.PTR("253.0.17.172.in-addr.arpa. 303	IN	PTR	172-17-0-253.svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
+	{ // A PTR record query for an existing ipv6 endpoint should return a record
+		Qname: "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa.", Qtype: dns.TypePTR,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.PTR("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa. 303 IN PTR 1234-abcd--1.headless-svc.test-1.svc.cluster.local."),
+		},
+	},
 	{ // A PTR record query for an existing service in an UNEXPOSED namespace should return NODATA
 		Qname: "120.0.0.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
@@ -51,7 +58,7 @@ func TestKubernetesPTR(t *testing.T) {
 	corefile := `    .:53 {
         errors
         log
-        kubernetes cluster.local 10.0.0.0/24 172.17.0.0/24 {
+        kubernetes cluster.local 10.0.0.0/24 172.17.0.0/24 1234:abcd::0/64 {
             namespaces test-1
         }
     }
