@@ -44,12 +44,12 @@ trap rmWorkdir EXIT
 
 function postStatus {
     body=$1
-    curl --user $GHTOKEN -X POST --data "{\"body\":\"$body\"}" https://api.github.com/repos/${COREDNSFORK}/${COREDNSPROJ}/issues/${PR}/comments | jq '.id'
+    curl --user $GHTOKEN -X POST --data "{\"body\":\"$body\"}" https://api.github.com/repos/${COREDNSFORK}/${SOURCEPROJ}/issues/${PR}/comments | jq '.id'
 }
 
 function updateStatus {
     body=$1
-    curl --user $GHTOKEN -X POST --data "{\"body\":\"$body\"}" https://api.github.com/repos/${COREDNSFORK}/${COREDNSPROJ}/issues/comments/${STATUSID}
+    curl --user $GHTOKEN -X POST --data "{\"body\":\"$body\"}" https://api.github.com/repos/${COREDNSFORK}/${SOURCEPROJ}/issues/comments/${STATUSID}
 }
 
 function lockFail {
@@ -61,6 +61,9 @@ function lockFail {
 body=$(echo ${PAYLOAD} | jq '.comment.body' | tr -d "\n\"")
 case "${body}" in
     */integration*)
+
+    export SOURCEPROJ=$(echo ${PAYLOAD} | jq '.repository.name' | tr -d "\n\"")
+    export DEPLOYMENTPATH=${GOPATH}/src/${COREDNSPATH}/deployment
     export STATUSID=$(postStatus "Integration test request received.")
 
     # Check lock
@@ -69,7 +72,7 @@ case "${body}" in
 
     # Setup log and post status + log link to PR
     touch /var/www/log/${PR}.txt  2>&1
-    echo "############### Integration Test ${COREDNSREPO}:PR${PR} #######################" > /var/www/log/${PR}.txt
+    echo "############### Integration Test ${COREDNSREPO}:PR${PR} Workdir: ${GOPATH} #######################" > /var/www/log/${PR}.txt
     chown www-data: /var/www/log/${PR}.txt 2>&1
     updateStatus "Integration test started. <a href='https://drone.coredns.io/log/view.html?pr=${PR}'>View Log</a>"
 
@@ -105,7 +108,7 @@ case "${body}" in
     export K8S_VERSION='v1.7.5'
     status="FAIL"
     SECONDS=0
-    make test >> /var/www/log/${PR}.txt 2>&1 && status="PASS"
+    make test-${SOURCEPROJ} >> /var/www/log/${PR}.txt 2>&1 && status="PASS"
 
   ;;
 esac

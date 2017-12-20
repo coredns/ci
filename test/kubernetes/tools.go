@@ -29,7 +29,7 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 	var err error
 	tries := 3
 	for {
-		cmdout, err = kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
+		cmdout, err = Kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
 		if err == nil {
 			break
 		}
@@ -75,14 +75,14 @@ func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
 
 // StartClientPod starts a dns client pod in the namespace
 func StartClientPod(namespace string) error {
-	_, err := kubectl("-n " + namespace + " run " + clientName + " --image=infoblox/dnstools --restart=Never -- -c 'while [ 1 ]; do sleep 100; done'")
+	_, err := Kubectl("-n " + namespace + " run " + clientName + " --image=infoblox/dnstools --restart=Never -- -c 'while [ 1 ]; do sleep 100; done'")
 	if err != nil {
 		// ignore error (pod already running)
 		return nil
 	}
 	maxWait := 60 // 60 seconds
 	for {
-		o, _ := kubectl("-n " + namespace + "  get pod " + clientName)
+		o, _ := Kubectl("-n " + namespace + "  get pod " + clientName)
 		if strings.Contains(o, "Running") {
 			return nil
 		}
@@ -150,27 +150,30 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 		return err
 	}
 	defer rmFunc()
-	_, err = kubectl("apply -f " + file)
+	_, err = Kubectl("apply -f " + file)
 	if err != nil {
 		return err
 	}
 
 	// force coredns pod reload the config
-	kubectl("-n kube-system delete pods -l k8s-app=coredns")
+	Kubectl("-n kube-system delete pods -l k8s-app=coredns")
 
-	// wait for coredns to be ready before continuing
-	maxWait := 30 // 15 seconds (each failed check sleeps 0.5 seconds)
+	return WaitReady(30)
+}
+
+// WaitReady waits for coredns to be ready or times out after maxWait seconds with an error
+func WaitReady(maxWait int) error {
 	running := 0
 	for {
-		o, _ := kubectl("-n kube-system get pods -l k8s-app=coredns")
+		o, _ := Kubectl("-n kube-system get pods -l k8s-app=coredns")
 		if strings.Contains(o, "Running") {
 			running += 1
 		}
-		if running >= 8 {
-			// give coredns a chance to read its config before declaring victory
+		if running >= 4 {
+			// give coredns a few extra seconds to read its config and get k8s cache
 			break
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(time.Second)
 		maxWait = maxWait - 1
 		if maxWait == 0 {
 			//println(o)
@@ -183,8 +186,8 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 
 // CorednsLogs returns the current coredns log
 func CorednsLogs() string {
-	name, _ := kubectl("-n kube-system get pods -l k8s-app=coredns | grep Running | cut -f1 -d' ' | tr -d '\n'")
-	logs, _ := kubectl("-n kube-system logs " + name)
+	name, _ := Kubectl("-n kube-system get pods -l k8s-app=coredns | grep Running | cut -f1 -d' ' | tr -d '\n'")
+	logs, _ := Kubectl("-n kube-system logs " + name)
 	return (logs)
 }
 
@@ -201,13 +204,23 @@ func prepForConfigMap(config string) string {
 	return configOut
 }
 
-// kubectl executes the kubectl command with the given arguments
-func kubectl(args string) (result string, err error) {
+// CoreDNSPodIPs return the ips of all coredns pods
+func CoreDNSPodIPs() ([]string, error) {
+	ips, err := Kubectl("-n kube-system get pods -l k8s-app=coredns -o wide | awk '{print $6}' | tail -n+2 | tr -d '\n'")
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(ips, "\n"), nil
+}
+
+// Kubectl executes the kubectl command with the given arguments
+func Kubectl(args string) (result string, err error) {
 	kctl := os.Getenv("KUBECTL")
 
 	if kctl == "" {
 		kctl = "kubectl"
 	}
+
 	cmdOut, err := exec.Command("sh", "-c", kctl+" "+args).CombinedOutput()
 	if err != nil {
 		return "", errors.New("got error '" + string(cmdOut) + "' for command " + kctl + " " + args)
