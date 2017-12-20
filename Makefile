@@ -1,18 +1,36 @@
-test: fetch-pr deploy-k8s test-k8s
+test-coredns: fetch-coredns-pr build-docker start-k8s test-k8s
 
-.PHONY: fetch-pr
-fetch-pr:
+test-deployment: fetch-deployment-pr fetch-coredns start-k8s test-k8s-deployment
 
-	# Get coredns code
+.PHONY: fetch-coredns-pr
+fetch-coredns-pr:
 	mkdir -p ${GOPATH}/src/${COREDNSPATH}
 	cd ${GOPATH}/src/${COREDNSPATH} && \
 	  git clone https://${COREDNSREPO}/coredns.git && \
 	  cd coredns && \
 	  git fetch --depth 1 origin pull/${PR}/head:pr-${PR} && \
+	  git checkout pr-${PR} && \
+	  go get
+
+.PHONY: fetch-coredns
+fetch-coredns:
+	mkdir -p ${GOPATH}/src/${COREDNSPATH}
+	cd ${GOPATH}/src/${COREDNSPATH} && \
+	  git clone https://${COREDNSREPO}/coredns.git && \
+	  cd coredns && \
+	  ${MAKE} godeps
+
+.PHONY: fetch-deployment-pr
+fetch-deployment-pr:
+	mkdir -p ${GOPATH}/src/${COREDNSPATH}
+	cd ${GOPATH}/src/${COREDNSPATH} && \
+	  git clone https://${COREDNSREPO}/deployment.git && \
+	  cd deployment && \
+	  git fetch --depth 1 origin pull/${PR}/head:pr-${PR} && \
 	  git checkout pr-${PR}
 
-.PHONY: deploy-k8s
-deploy-k8s:
+.PHONY: build-docker
+build-docker:
 	# Start local docker image repo (k8s must pull images from a repo)
 	-docker run -d -p 5000:5000 --restart=always --name registry registry:2.6.2 || true
 
@@ -23,6 +41,8 @@ deploy-k8s:
 	  docker tag coredns localhost:5000/coredns && \
 	  docker push localhost:5000/coredns
 
+.PHONY: start-k8s
+start-k8s:
 	# Set up minikube
 	-sh ./build/kubernetes/minikube_setup.sh
 
@@ -30,6 +50,11 @@ deploy-k8s:
 test-k8s:
 	# Do tests
 	go test -v ./test/kubernetes/...
+
+.PHONY: test-k8s-deployment
+test-k8s-deployment:
+	# Do tests
+	go test -v ./test/k8sdeployment/...
 
 .PHONY: clean-k8s
 clean-k8s:
