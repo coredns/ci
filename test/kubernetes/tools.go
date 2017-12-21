@@ -206,7 +206,7 @@ func prepForConfigMap(config string) string {
 
 // CoreDNSPodIPs return the ips of all coredns pods
 func CoreDNSPodIPs() ([]string, error) {
-	ips, err := Kubectl("-n kube-system get pods -l k8s-app=coredns -o wide | awk '{print $6}' | tail -n+2 | tr -d '\n'")
+	ips, err := Kubectl("-n kube-system get pods -l k8s-app=coredns -o wide | awk '{print $6}' | tail -n+2")
 	if err != nil {
 		return nil, err
 	}
