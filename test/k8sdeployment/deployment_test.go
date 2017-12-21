@@ -90,6 +90,9 @@ func TestKubernetesDeployment(t *testing.T) {
 			t.Errorf("could not get coredns pod ips: %v", err)
 		}
 		for _, ip := range ips {
+			if ip == "" {
+				continue
+			}
 			mf := metrics.Scrape(t, "http://"+ip+":9153/metrics")
 			if len(mf) == 0 {
 				t.Errorf("unable to scrape metrics from %v", ip)
