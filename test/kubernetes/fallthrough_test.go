@@ -93,6 +93,71 @@ func TestKubernetesFallthrough(t *testing.T) {
 	}
 }
 
+var dnsTestCasesFallthroughFiltered = []test.Case{
+	{
+		Qname: "f.b.svc.cluster.local.", Qtype: dns.TypeA,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.A("f.b.svc.cluster.local.      303    IN      A       10.10.10.11"),
+		},
+		Ns: []dns.RR{
+			test.NS("cluster.local.	303	IN	NS	a.iana-servers.net."),
+			test.NS("cluster.local.	303	IN	NS	b.iana-servers.net."),
+		},
+	},
+	{
+		Qname: "foo.cluster.local.", Qtype: dns.TypeA,
+		Rcode: dns.RcodeNameError,
+		Ns: []dns.RR{
+			test.SOA("cluster.local.	303	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1502313310 7200 1800 86400 60"),
+		},
+	},
+}
+
+func TestKubernetesFallthroughFiltered(t *testing.T) {
+
+	rmFunc, upstream, udp := UpstreamServer(t, "example.net", ExampleNet)
+	defer upstream.Stop()
+	defer rmFunc()
+
+	time.Sleep(1 * time.Second)
+
+	corefile := `    .:53 {
+	  errors
+	  log
+      file /etc/coredns/Zonefile cluster.local
+      kubernetes cluster.local {
+          namespaces test-1
+          upstream ` + udp + `
+          fallthrough svc.cluster.local
+      }
+    }
+`
+	err := LoadCorefileAndZonefile(corefile, clusterLocal)
+	if err != nil {
+		t.Fatalf("Could not load corefile/zonefile: %s", err)
+	}
+	testCases := dnsTestCasesFallthroughFiltered
+	namespace := "test-1"
+	err = StartClientPod(namespace)
+	if err != nil {
+		t.Fatalf("failed to start client pod: %s", err)
+	}
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
+			res, err := DoIntegrationTest(tc, namespace)
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			test.CNAMEOrder(t, res)
+			test.SortAndCheck(t, res, tc)
+			if t.Failed() {
+				t.Errorf("coredns log: %s", CorednsLogs())
+			}
+		})
+	}
+}
+
 const clusterLocal = `    ; cluster.local test file for fallthrough
     cluster.local.		IN	SOA	sns.dns.icann.org. noc.dns.icann.org. 2015082541 7200 3600 1209600 3600
     cluster.local.		IN	NS	b.iana-servers.net.
