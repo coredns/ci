@@ -18,6 +18,9 @@ import (
 	"github.com/mholt/caddy"
 	"github.com/miekg/dns"
 	"time"
+
+	// Load all managed plugins in github.com/coredns/coredns
+	_ "github.com/coredns/coredns/core/plugin"
 )
 
 // DoIntegrationTest executes a test case
