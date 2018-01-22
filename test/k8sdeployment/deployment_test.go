@@ -2,15 +2,15 @@ package k8sdeployment
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/miekg/dns"
-
 	metrics "github.com/coredns/coredns/plugin/metrics/test"
 	"github.com/coredns/coredns/plugin/test"
-
 	"github.com/coredns/ci/test/kubernetes"
 )
 
@@ -80,7 +80,35 @@ func TestKubernetesDeployment(t *testing.T) {
 	t.Run("Verify_coredns_starts", func(t *testing.T) {
 		maxWait := 120
 		if kubernetes.WaitReady(maxWait) != nil {
-			t.Fatalf("coredns not ready in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
+			t.Fatalf("coredns failed to start in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
+		}
+	})
+
+	t.Run("Verify_coredns_healthy", func(t *testing.T) {
+		timeout := time.Second * time.Duration(90)
+
+		ips, err := kubernetes.CoreDNSPodIPs()
+		if err != nil {
+			t.Errorf("could not get coredns pod ips: %v", err)
+		}
+		for _, ip := range ips {
+			if ip == "" {
+				continue
+			}
+			start := time.Now()
+			for {
+				resp, _ := http.Get("http:/" + ip + ":8080/health")
+				// Any code greater than or equal to 200 and less than 400 indicates success.
+				// Any other code indicates failure.
+				if resp.StatusCode >= 200 && resp.StatusCode < 400 {
+					break
+				}
+				if time.Since(start) >= timeout {
+					continue
+					t.Errorf("pod (%v) was not healthy in %v", ip, timeout)
+				}
+				time.Sleep(time.Second)
+			}
 		}
 	})
 
