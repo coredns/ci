@@ -97,10 +97,10 @@ func TestKubernetesDeployment(t *testing.T) {
 			}
 			start := time.Now()
 			for {
-				resp, _ := http.Get("http:/" + ip + ":8080/health")
+				resp, _ := http.Get("http://" + ip + ":8080/health")
 				// Any code greater than or equal to 200 and less than 400 indicates success.
 				// Any other code indicates failure.
-				if resp.StatusCode >= 200 && resp.StatusCode < 400 {
+				if resp != nil && resp.StatusCode >= 200 && resp.StatusCode < 400 {
 					break
 				}
 				if time.Since(start) >= timeout {
