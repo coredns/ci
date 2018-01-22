@@ -97,7 +97,6 @@ func TestKubernetesDeployment(t *testing.T) {
 			}
 			start := time.Now()
 			for {
-				time.Sleep(time.Second)
 				fmt.Printf("testing pod: %v\n", ip)
 
 				resp, err := http.Get("http://" + ip + ":8080/health")
@@ -107,6 +106,7 @@ func TestKubernetesDeployment(t *testing.T) {
 
 				if err != nil {
 					t.Logf("pod (%v) healthy check error %v", ip, err)
+					time.Sleep(time.Second)
 					continue
 				}
 
@@ -120,7 +120,7 @@ func TestKubernetesDeployment(t *testing.T) {
 					t.Errorf("pod (%v) was not healthy in %v", ip, timeout)
 					break
 				}
-
+				time.Sleep(time.Second)
 			}
 		}
 	})
