@@ -12,7 +12,6 @@ import (
 	metrics "github.com/coredns/coredns/plugin/metrics/test"
 	"github.com/coredns/coredns/plugin/test"
 	"github.com/miekg/dns"
-	"net"
 )
 
 var deploymentDNSCases = []test.Case{
@@ -92,16 +91,14 @@ func TestKubernetesDeployment(t *testing.T) {
 		if err != nil {
 			t.Errorf("could not get coredns pod ips: %v", err)
 		}
+		if len(ips) != 2 {
+			t.Errorf("Expected 2 pods, found: %v", len(ips))
+		}
 		for _, ip := range ips {
-			p := net.ParseIP(ip)
-			if p == nil {
-				continue
-			}
 			start := time.Now()
 			for {
 				fmt.Printf("testing pod: %v\n", ip)
-
-				fmt.Printf("http://" + ip + ":8080/health")
+				fmt.Printf("http://" + ip + ":8080/health\n")
 				resp, err := http.Get("http://" + ip + ":8080/health")
 
 				fmt.Printf("time elapsed: %v\n", time.Since(start))
@@ -132,11 +129,10 @@ func TestKubernetesDeployment(t *testing.T) {
 		if err != nil {
 			t.Errorf("could not get coredns pod ips: %v", err)
 		}
+		if len(ips) != 2 {
+			t.Errorf("Expected 2 pods, found: %v", len(ips))
+		}
 		for _, ip := range ips {
-			p := net.ParseIP(ip)
-			if p == nil {
-				continue
-			}
 			mf := metrics.Scrape(t, "http://"+ip+":9153/metrics")
 			if len(mf) == 0 {
 				t.Errorf("unable to scrape metrics from %v", ip)

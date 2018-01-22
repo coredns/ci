@@ -209,11 +209,19 @@ func prepForConfigMap(config string) string {
 
 // CoreDNSPodIPs return the ips of all coredns pods
 func CoreDNSPodIPs() ([]string, error) {
-	ips, err := Kubectl("-n kube-system get pods -l k8s-app=coredns -o wide | awk '{print $6}' | tail -n+2")
+	lines, err := Kubectl("-n kube-system get pods -l k8s-app=coredns -o wide | awk '{print $6}' | tail -n+2")
 	if err != nil {
 		return nil, err
 	}
-	return strings.Split(ips, "\n"), nil
+	var ips []string
+	for _, l := range strings.Split(lines, "\n") {
+		p := net.ParseIP(l)
+		if p == nil {
+			continue
+		}
+		ips = append(ips, p.String())
+	}
+	return ips, nil
 }
 
 // Kubectl executes the kubectl command with the given arguments
