@@ -97,7 +97,12 @@ func TestKubernetesDeployment(t *testing.T) {
 			}
 			start := time.Now()
 			for {
+				fmt.Printf("testing pod: %v\n", ip)
+
 				resp, err := http.Get("http://" + ip + ":8080/health")
+
+				fmt.Printf("time elapsed: %v\n", time.Since(start))
+				fmt.Printf("status: %v\n", resp.Status)
 
 				// Any code greater than or equal to 200 and less than 400 indicates success.
 				// Any other code indicates failure.
