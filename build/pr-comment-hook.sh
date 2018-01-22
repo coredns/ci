@@ -62,6 +62,8 @@ body=$(echo ${PAYLOAD} | jq '.comment.body' | tr -d "\n\"")
 case "${body}" in
     */integration*)
 
+    [[ "${body}" =~ \/integration-cipr([0-9]+) ]] && export CIPR=${BASH_REMATCH[1]}
+
     export SOURCEPROJ=$(echo ${PAYLOAD} | jq '.repository.name' | tr -d "\n\"")
     export DEPLOYMENTPATH=${GOPATH}/src/${COREDNSPATH}/deployment
     export STATUSID=$(postStatus "Integration test request received.")
@@ -81,8 +83,14 @@ case "${body}" in
     cd ${GOPATH}/src/${COREDNSPATH}
     git clone https://${COREDNSREPO}/ci.git
     cd ci
+    if [[ -n "$CIPR" ]] ; then
+      echo "Fetching CI PR $CIPR..."
+      git fetch --depth 1 origin pull/${CIPR}/head:pr-${CIPR}
+      echo "Checkout CI PR $CIPR..."
+      git checkout pr-${CIPR}
+    fi
 
-	# Set up a finish & clean up on exit
+    # Set up a finish & clean up on exit
     function finishIntegrationTest {
         make clean-k8s >> /var/www/log/${PR}.txt 2>&1
         # Post result to pr
