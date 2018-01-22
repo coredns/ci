@@ -12,6 +12,7 @@ import (
 	metrics "github.com/coredns/coredns/plugin/metrics/test"
 	"github.com/coredns/coredns/plugin/test"
 	"github.com/miekg/dns"
+	"net"
 )
 
 var deploymentDNSCases = []test.Case{
@@ -92,13 +93,15 @@ func TestKubernetesDeployment(t *testing.T) {
 			t.Errorf("could not get coredns pod ips: %v", err)
 		}
 		for _, ip := range ips {
-			if ip == "" {
+			p := net.ParseIP(ip)
+			if p == nil {
 				continue
 			}
 			start := time.Now()
 			for {
 				fmt.Printf("testing pod: %v\n", ip)
 
+				fmt.Printf("http://" + ip + ":8080/health")
 				resp, err := http.Get("http://" + ip + ":8080/health")
 
 				fmt.Printf("time elapsed: %v\n", time.Since(start))
