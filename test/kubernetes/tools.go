@@ -169,7 +169,7 @@ func WaitReady(maxWait int) error {
 	running := 0
 	for {
 		o, _ := Kubectl("-n kube-system get pods -l k8s-app=coredns")
-		if strings.Contains(o, "Running") {
+		if strings.Count(o, "Running") == 2 {
 			running += 1
 		}
 		if running >= 4 {
