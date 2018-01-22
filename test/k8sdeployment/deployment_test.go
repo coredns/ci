@@ -97,6 +97,7 @@ func TestKubernetesDeployment(t *testing.T) {
 			}
 			start := time.Now()
 			for {
+				time.Sleep(time.Second)
 				fmt.Printf("testing pod: %v\n", ip)
 
 				resp, err := http.Get("http://" + ip + ":8080/health")
@@ -104,20 +105,22 @@ func TestKubernetesDeployment(t *testing.T) {
 				fmt.Printf("time elapsed: %v\n", time.Since(start))
 				fmt.Printf("status: %v\n", resp.Status)
 
-				// Any code greater than or equal to 200 and less than 400 indicates success.
-				// Any other code indicates failure.
-				if resp != nil && resp.StatusCode >= 200 && resp.StatusCode < 400 {
-					break
-				}
 				if err != nil {
 					t.Logf("pod (%v) healthy check error %v", ip, err)
 					continue
 				}
+
+				// Any code greater than or equal to 200 and less than 400 indicates success.
+				// Any other code indicates failure.
+				if resp.StatusCode >= 200 && resp.StatusCode < 400 {
+					break
+				}
+
 				if time.Since(start) >= timeout {
 					t.Errorf("pod (%v) was not healthy in %v", ip, timeout)
 					break
 				}
-				time.Sleep(time.Second)
+
 			}
 		}
 	})
