@@ -97,12 +97,7 @@ func TestKubernetesDeployment(t *testing.T) {
 		for _, ip := range ips {
 			start := time.Now()
 			for {
-				fmt.Printf("testing pod: %v\n", ip)
-				fmt.Printf("http://" + ip + ":8080/health\n")
 				resp, err := http.Get("http://" + ip + ":8080/health")
-
-				fmt.Printf("time elapsed: %v\n", time.Since(start))
-
 				if err != nil {
 					t.Logf("pod (%v) healthy check error %v", ip, err)
 					time.Sleep(time.Second)
