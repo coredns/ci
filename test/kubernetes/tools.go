@@ -164,12 +164,18 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	return WaitReady(30)
 }
 
-// WaitReady waits for coredns to be ready or times out after maxWait seconds with an error
+// WaitReady waits for 1 coredns to be ready or times out after maxWait seconds with an error
 func WaitReady(maxWait int) error {
+	return WaitNReady(maxWait, 1)
+}
+
+// WaitReady waits for n corednses to be ready or times out after maxWait seconds with an error
+func WaitNReady(maxWait, n int) error {
+
 	running := 0
 	for {
 		o, _ := Kubectl("-n kube-system get pods -l k8s-app=coredns")
-		if strings.Count(o, "Running") == 2 {
+		if strings.Count(o, "Running") == n {
 			running += 1
 		}
 		if running >= 4 {

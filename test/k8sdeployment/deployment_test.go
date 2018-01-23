@@ -79,7 +79,7 @@ func TestKubernetesDeployment(t *testing.T) {
 
 	t.Run("Verify_coredns_starts", func(t *testing.T) {
 		maxWait := 120
-		if kubernetes.WaitReady(maxWait) != nil {
+		if kubernetes.WaitNReady(maxWait, 2) != nil {
 			t.Fatalf("coredns failed to start in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
 		}
 	})
