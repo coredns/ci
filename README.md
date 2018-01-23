@@ -8,11 +8,11 @@ You can initiate an integration test by including "/integration" in a comment fo
 * `coredns/coredns`: Issuing an integration test from a PR in this repo will run the tests in `/coredns/ci/tests/kubernetes`.  These test a variety of coredns configurations in an attempt to provide wide integration level coverage for the `kubernetes` plugin. 
 * `coredns/deployment`: Issuing an integration test from a PR in this repo will run the tests in `/coredns/ci/tests/k8sdeployment`.  This smaller set of tests validate the kubernetes deployment script creates a functional deployment.
 
-After making the comment, the CoreDNS CI Bot should make a comment back in the originating PR that the request is received, and start the test.  The Bot will post a link to a log, and post results back to the same comment when the test is complete.  The tests typically take a few minutes to run.
+After making the comment, the CoreDNS CI Bot should post a status back in the originating PR that the request is received, and start the test.  The tests typically take a 3-5 minutes to run.
 
-The integration tests are executed one at a time, and no queue is implemented.  If a request is made while another test is in progress, it will wait for 5 minutes for the existing test to finish, or give up and post a comment to the originating PR.
+The integration tests are executed one at a time, and no queue is implemented.  If a request is made while another test is in progress, it will wait for 5 minutes for the existing test to finish, or give up and update with an error the status to the originating PR.
 
-You may request multiple integration tests for the same PR, but only one log is kept per PR.  A new integration request will overwrite the prior integration test log of the same PR.
+You may request multiple integration tests for the same PR, but only one log is kept per commit.  A new integration request will overwrite the prior integration test log of the same commit.
 
 ### Adding and Testing New Tests, or Changes to Tests
 
