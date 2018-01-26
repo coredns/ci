@@ -8,7 +8,7 @@ fetch-coredns-pr:
 	cd ${GOPATH}/src/${COREDNSPATH} && \
 	  git clone https://${COREDNSREPO}/coredns.git && \
 	  cd coredns && \
-	  git fetch --depth 1 origin pull/${PR}/head:pr-${PR} && \
+	  git fetch origin +refs/pull/1435/merge:pr-${PR} && \
 	  git checkout pr-${PR} && \
 	  go get
 
