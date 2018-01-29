@@ -152,6 +152,8 @@ function finishIntegrationTest {
   fail=$(cat $logpath | grep "^\-\-\- FAIL:" | wc -l)
   subpass=$(cat $logpath | grep "^    \-\-\- PASS:" | wc -l)
   subfail=$(cat $logpath | grep "^    \-\-\- FAIL:" | wc -l)
+  kills=$(cat $logpath | grep "^*** Test killed " | wc -l)
+  fail=$((fail + kills))
   total=$((pass + fail))
   totalsub=$((subpass + subfail))
 
