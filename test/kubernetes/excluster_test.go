@@ -25,8 +25,8 @@ func TestKubernetesSecureAPI(t *testing.T) {
 	corefile :=
 		`.:0 {
     kubernetes cluster.local {
-        endpoint https://192.168.99.100:8443
-        tls /root/.minikube/certs/cert.pem /root/.minikube/certs/key.pem /root/.minikube/certs/ca.pem 
+        endpoint https://127.0.0.1:8443
+        tls /root/.minikube/client.crt /root/.minikube/client.key /root/.minikube/ca.crt 
     }`
 
 	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
