@@ -80,7 +80,11 @@ func TestKubernetesAPIFallthrough(t *testing.T) {
 		test.SortAndCheck(t, res, tc)
 	}
 }
+func TestKubernetesSecureAPIFallthrough(t *testing.T) {
+	t.Skip("Skipped coredns/coredns#1464")
+}
 
+/*
 func TestKubernetesSecureAPIFallthrough(t *testing.T) {
 
 	corefile :=
@@ -111,3 +115,4 @@ func TestKubernetesSecureAPIFallthrough(t *testing.T) {
 		test.SortAndCheck(t, res, tc)
 	}
 }
+*/
