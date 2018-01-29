@@ -10,16 +10,48 @@ import (
 	"github.com/miekg/dns"
 )
 
-func TestKubernetesAPIFallthrough(t *testing.T) {
-	tests := []test.Case{
-		{
-			Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
-			Rcode: dns.RcodeSuccess,
-			Answer: []dns.RR{
-				test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
-			},
+var tests = []test.Case{
+	{
+		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
 		},
+	},
+}
+
+func TestKubernetesSecureAPI(t *testing.T) {
+
+	corefile :=
+		`.:0 {
+    kubernetes cluster.local {
+        endpoint https://192.168.99.100:8443
+        tls /root/.minikube/certs/cert.pem /root/.minikube/certs/key.pem /root/.minikube/certs/ca.pem 
+    }`
+
+	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
+	if err != nil {
+		t.Fatalf("Could not get CoreDNS serving instance: %s", err)
 	}
+	defer server.Stop()
+
+	// Work-around for timing condition that results in no-data being returned in test environment.
+	time.Sleep(3 * time.Second)
+
+	for _, tc := range tests {
+
+		c := new(dns.Client)
+		m := tc.Msg()
+
+		res, _, err := c.Exchange(m, udp)
+		if err != nil {
+			t.Fatalf("Could not send query: %s", err)
+		}
+		test.SortAndCheck(t, res, tc)
+	}
+}
+
+func TestKubernetesAPIFallthrough(t *testing.T) {
 
 	corefile :=
 		`.:0 {
