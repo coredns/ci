@@ -65,6 +65,12 @@ fi
 
 # Parse Pull Request Event
 if [[ ${event_type} == "pullrequest" ]]; then
+  # Only trigger on commit synchronization
+  action=$(echo ${PAYLOAD} | jq '.action' | tr -d "\n\"")
+  if [[ "${action}" != "synchronize" ]]; then
+      exit 0
+  fi
+
   # Get the PR number
   export PR=$(echo ${PAYLOAD} | jq '.number' | tr -d "\n\"")
   if [[ "${PR}" == "null" ]]; then
