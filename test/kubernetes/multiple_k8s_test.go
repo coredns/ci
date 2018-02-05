@@ -1,12 +1,13 @@
 package kubernetes
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/coredns/coredns/plugin/test"
+	intTest "github.com/coredns/coredns/test"
 
 	"github.com/miekg/dns"
+	"time"
 )
 
 var multiK8sCases = []test.Case{
@@ -18,7 +19,7 @@ var multiK8sCases = []test.Case{
 		},
 	},
 	{ // An A record query for an existing service should return a record
-		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
+		Qname: "kubernetes.default.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
 			test.A("kubernetes.default.svc.cluster.local.      20    IN      A       10.0.0.1"),
@@ -28,42 +29,41 @@ var multiK8sCases = []test.Case{
 
 func TestMultiKubernetes(t *testing.T) {
 
-	corefile := `    .:53 {
-        errors
-        log
-        kubernetes cluster.local {
-            namespaces test-1
-            ttl 10
-            fallthrough
-        }
-        kubernetes cluster.local {
-            namespaces default
-            ttl 20
-        }
+	corefile :=
+		`.:0 {
+    kubernetes cluster.local {
+        ttl 10
+        namespaces test-1
+        endpoint https://127.0.0.1:8443
+        tls /root/.minikube/client.crt /root/.minikube/client.key /root/.minikube/ca.crt
+        fallthrough
     }
-`
+    kubernetes cluster.local {
+        ttl 20
+        namespaces default
+        endpoint https://127.0.0.1:8443
+        tls /root/.minikube/client.crt /root/.minikube/client.key /root/.minikube/ca.crt 
+    }
+}`
 
-	err := LoadCorefile(corefile)
+	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
 	if err != nil {
-		t.Fatalf("Could not load corefile: %s", err)
+		t.Fatalf("Could not get CoreDNS serving instance: %s", err)
 	}
-	testCases := multiK8sCases
-	namespace := "test-1"
-	err = StartClientPod(namespace)
-	if err != nil {
-		t.Fatalf("failed to start client pod: %s", err)
-	}
-	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
-			res, err := DoIntegrationTest(tc, namespace)
-			if err != nil {
-				t.Errorf(err.Error())
-			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
-			if t.Failed() {
-				t.Errorf("coredns log: %s", CorednsLogs())
-			}
-		})
+	defer server.Stop()
+
+	// Work-around for timing condition that results in no-data being returned in test environment.
+	time.Sleep(3 * time.Second)
+
+	for _, tc := range multiK8sCases {
+
+		c := new(dns.Client)
+		m := tc.Msg()
+
+		res, _, err := c.Exchange(m, udp)
+		if err != nil {
+			t.Fatalf("Could not send query: %s", err)
+		}
+		test.SortAndCheck(t, res, tc)
 	}
 }
