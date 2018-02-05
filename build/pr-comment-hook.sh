@@ -67,7 +67,7 @@ fi
 if [[ ${event_type} == "pullrequest" ]]; then
   # Only trigger on commit synchronization
   action=$(echo ${PAYLOAD} | jq '.action' | tr -d "\n\"")
-  if [[ "${action}" != "synchronize" ]]; then
+  if [[ "${action}" != "synchronize" ]] && [[ "${action}" != "opened" ]]; then
       exit 0
   fi
 
