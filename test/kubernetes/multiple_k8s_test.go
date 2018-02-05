@@ -9,7 +9,7 @@ import (
 	"github.com/miekg/dns"
 )
 
-var dnsTestCasesA = []test.Case{
+var multiK8sCases = []test.Case{
 	{ // An A record query for an existing service should return a record
 		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
@@ -47,7 +47,7 @@ func TestMultiKubernetes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Could not load corefile: %s", err)
 	}
-	testCases := dnsTestCasesA
+	testCases := multiK8sCases
 	namespace := "test-1"
 	err = StartClientPod(namespace)
 	if err != nil {
