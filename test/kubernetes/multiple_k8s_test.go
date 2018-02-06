@@ -62,7 +62,7 @@ func TestMultiKubernetes(t *testing.T) {
 
 		res, _, err := c.Exchange(m, udp)
 		if err != nil {
-			t.Fatalf("Could not send query: %s", err)
+			t.Errorf("Could not send query: %s", err)
 		}
 		test.SortAndCheck(t, res, tc)
 	}
