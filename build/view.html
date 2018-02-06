@@ -21,9 +21,10 @@
 
         // Make the XMLHttpRequest object
         var http = createRequestObject();
+        var log = "";
 
         function sendRequest() {
-            var pr = getParameterByName("pr")
+            var pr = getParameterByName("pr");
             var timestamp = new Date();
             http.open('get', '/log/'+pr+'.txt?t='+timestamp);
             http.onreadystatechange = handleResponse;
@@ -32,11 +33,15 @@
 
         function handleResponse() {
             if(http.readyState == 4 && http.status == 200){
+
                 var response = http.responseText;
                 if(response) {
-                    document.getElementById("log").innerHTML = response;
-                    if (document.getElementById("followcheck").checked) {
-                        window.scrollTo(0,document.body.scrollHeight);
+                    if (log.length != response.length)  {
+                        log = response;
+                        document.getElementById("log").innerHTML = response;
+                        if (document.getElementById("followcheck").checked) {
+                            window.scrollTo(0,document.body.scrollHeight);
+                        }
                     }
                     setTimeout(update,1000);
                 }
@@ -51,14 +56,13 @@
             var url = window.location.href;
             name = name.replace(/[\[\]]/g, "\\$&");
             var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                results = regex.exec(url);
+                    results = regex.exec(url);
             if (!results) return null;
             if (!results[2]) return '';
             return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
 
         function stopFollow(){
-            // Stop following the log if user scrolls off the bottom of the window
             if (window.scrollY < document.body.scrollHeight - window.innerHeight){
                 document.getElementById("followcheck").checked = false
             }
@@ -70,10 +74,10 @@
 
     </script>
 </head>
-<body onLoad="sendRequest()" onscroll="stopFollow()"/>
+<body onLoad="sendRequest()" onscroll="stopFollow()">
 <span style="position:fixed;top:2%;right:2%"> <input type="checkbox"  checked="true" onclick="startFollow()" id="followcheck" title="follow log"/> follow </span>
 <pre>
-<span id="log" name="log"></span>
+<span id="log"></span>
 </pre>
 </body>
 </html>

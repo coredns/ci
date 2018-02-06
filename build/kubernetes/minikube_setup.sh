@@ -28,7 +28,7 @@ do
 done
 
 # Disable kube-dns in addon manager
-minikube addons disable kube-dns
+minikube addons disable kube-dns 2> /dev/null
 
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
@@ -40,3 +40,7 @@ kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 kubectl proxy --port=8080 2> /dev/null &
 echo -n $! > /var/run/kubectl_proxy.pid
 sleep 3
+
+#
+# minikube_setup.sh (complete)
+#
