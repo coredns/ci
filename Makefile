@@ -31,7 +31,7 @@ fetch-deployment-pr:
 
 .PHONY: build-docker
 build-docker:
-	# Start local docker image repo (k8s must pull images from a repo)
+	# Start local docker image repo
 	-docker run -d -p 5000:5000 --restart=always --name registry registry:2.6.2 || true
 
 	# Build coredns docker image, and push to local repo
@@ -48,12 +48,12 @@ start-k8s:
 
 .PHONY: test-k8s
 test-k8s:
-	# Do tests
+	# Integration tests
 	go test -v ./test/kubernetes/...
 
 .PHONY: test-k8s-deployment
 test-k8s-deployment:
-	# Do tests
+	# Integration tests
 	go test -v ./test/k8sdeployment/...
 
 .PHONY: clean-k8s

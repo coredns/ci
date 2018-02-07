@@ -6,6 +6,7 @@ ci_bin=$GOPATH/src/github.com/coredns/ci/build
 # Start local docker image repository
 docker run -d -p 5000:5000 --restart=always --name registry registry:2.6.2
 
+# Start minikube
 export MINIKUBE_WANTUPDATENOTIFICATION=false
 export MINIKUBE_WANTREPORTERRORPROMPT=false
 export MINIKUBE_HOME=$HOME
@@ -17,7 +18,7 @@ export KUBECONFIG=$HOME/.kube/config
 
 minikube start --vm-driver=none --kubernetes-version=${K8S_VERSION}
 
-# Wait for kubernetes api service to be ready
+# Wait for minkube's api service to be ready
 for i in {1..60} # timeout for 2 minutes
 do
    kubectl get po
