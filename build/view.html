@@ -41,7 +41,7 @@
                 display = "none";
                 // If there is a div already present for this section, retain the display style
                 div = document.getElementById(i);
-                if (div) {
+                if (div && !document.getElementById("followcheck").checked) {
                     display = div.style.display;
                 }
                 // Replace (one at a time) comments that start with a capital letter
