@@ -1,10 +1,9 @@
 <html>
 <head>
     <script type="text/javascript">
+
         function createRequestObject() {
-
             var req;
-
             if(window.XMLHttpRequest){
                 // Firefox, Safari, Opera...
                 req = new XMLHttpRequest();
@@ -22,9 +21,45 @@
         // Make the XMLHttpRequest object
         var http = createRequestObject();
         var log = "";
+        var lastDiv=0;
+        var pr = getParameterByName("pr")
+
+        // toggle the given div between block and none style display
+        function toggle(div){
+            var x = document.getElementById(div);
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+        }
+
+        // Divide log into collapsible divs
+        function insertCollapsibleDivs(s){
+            i=0;
+            while (true) {
+                display = "none";
+                // If there is a div already present for this section, retain the display style
+                div = document.getElementById(i);
+                if (div) {
+                    display = div.style.display;
+                }
+                // Replace (one at a time) comments that start with a capital letter
+                // with a toggle and collapsible div
+                t = s.replace(/#+ ([A-Z][^\n#]*)[^\n]*/, "</pre></div><br><a href='javascript:void(0)' onclick='toggle("+i+")'>(+/-)$1</a><div id="+i+" style='display: "+display+";'><pre>");
+                // If nothing changed this time, we're done
+                if (s == t) {
+                    break;
+                }
+                s = t;
+                i++;
+            }
+            lastDiv = i-1;
+            // Close the open ended divs on each end of the string
+            return "<div><pre>"+s+"</pre></div>"
+        }
 
         function sendRequest() {
-            var pr = getParameterByName("pr");
             var timestamp = new Date();
             http.open('get', '/log/'+pr+'.txt?t='+timestamp);
             http.onreadystatechange = handleResponse;
@@ -33,12 +68,12 @@
 
         function handleResponse() {
             if(http.readyState == 4 && http.status == 200){
-
-                var response = http.responseText;
+                var response = insertCollapsibleDivs(http.responseText);
                 if(response) {
                     if (log.length != response.length)  {
-                        log = response;
+                        log = response
                         document.getElementById("log").innerHTML = response;
+                        document.getElementById(lastDiv).style.display = "block";
                         if (document.getElementById("followcheck").checked) {
                             window.scrollTo(0,document.body.scrollHeight);
                         }
@@ -75,9 +110,10 @@
     </script>
 </head>
 <body onLoad="sendRequest()" onscroll="stopFollow()">
-<span style="position:fixed;top:2%;right:2%"> <input type="checkbox"  checked="true" onclick="startFollow()" id="followcheck" title="follow log"/> follow </span>
-<pre>
+<span style="position:fixed;top:2%;right:2%">
+	<input type="checkbox"  checked onclick="startFollow()" id="followcheck" title="follow log"/> follow<br/>
+	<a href='javascript:document.location = pr+".txt"'>raw log</a>
+</span>
 <span id="log"></span>
-</pre>
 </body>
 </html>
