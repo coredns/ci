@@ -14,11 +14,8 @@ mkdir $HOME/.kube || true
 touch $HOME/.kube/config
 
 export KUBECONFIG=$HOME/.kube/config
-if [[ -z ${K8S_VERSION} ]]; then
-  minikube start --vm-driver=none
-else
-  minikube start --vm-driver=none --kubernetes-version=${K8S_VERSION}
-fi
+
+minikube start --vm-driver=none --kubernetes-version=${K8S_VERSION}
 
 # Wait for kubernetes api service to be ready
 for i in {1..60} # timeout for 2 minutes
@@ -31,7 +28,7 @@ do
 done
 
 # Disable kube-dns in addon manager
-minikube addons disable kube-dns
+minikube addons disable kube-dns 2> /dev/null
 
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
@@ -43,3 +40,4 @@ kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 kubectl proxy --port=8080 2> /dev/null &
 echo -n $! > /var/run/kubectl_proxy.pid
 sleep 3
+
