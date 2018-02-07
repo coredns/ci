@@ -1,7 +1,6 @@
 <html>
 <head>
     <script type="text/javascript">
-
         function createRequestObject() {
             var req;
             if(window.XMLHttpRequest){
@@ -22,7 +21,7 @@
         var http = createRequestObject();
         var log = "";
         var lastDiv=0;
-        var pr = getParameterByName("pr")
+        var pr = getParameterByName("pr");
 
         // toggle the given div between block and none style display
         function toggle(div){
@@ -34,9 +33,19 @@
             }
         }
 
+        // colorize pass/failure text
+        function colorize(s){
+            s = s.replace(/(FAIL)/g, "<span style='color:red;'>$1</span>");
+            s = s.replace(/(FAILED)/ig, "<span style='color:red;'>$1</span>");
+            s = s.replace(/(PASS)/g, "<span style='color:green;'>$1</span>");
+            s = s.replace(/(PASSED)/ig, "<span style='color:green;'>$1</span>");
+            s = s.replace(/(SKIP)/g, "<span style='color:yellow;'>$1</span>");
+            return s;
+        }
+
         // Divide log into collapsible divs
         function insertCollapsibleDivs(s){
-            i=0;
+            var i = 0;
             while (true) {
                 display = "none";
                 // If there is a div already present for this section, retain the display style
@@ -46,7 +55,7 @@
                 }
                 // Replace (one at a time) comments that start with a capital letter
                 // with a toggle and collapsible div
-                t = s.replace(/#+ ([A-Z][^\n#]*)[^\n]*/, "</pre></div><br><a href='javascript:void(0)' onclick='toggle("+i+")'>(+/-)$1</a><div id="+i+" style='display: "+display+";'><pre>");
+                var t = s.replace(/#+ ([A-Z][^\n#]*)[^\n]*/, "</pre></div><br><a href='javascript:void(0)' onclick='toggle("+i+")'>(+/-) $1</a><div id="+i+" style='display: "+display+"'><pre>");
                 // If nothing changed this time, we're done
                 if (s == t) {
                     break;
@@ -68,10 +77,10 @@
 
         function handleResponse() {
             if(http.readyState == 4 && http.status == 200){
-                var response = insertCollapsibleDivs(http.responseText);
+                var response = colorize(insertCollapsibleDivs(http.responseText));
                 if(response) {
                     if (log.length != response.length)  {
-                        log = response
+                        log = response;
                         document.getElementById("log").innerHTML = response;
                         document.getElementById(lastDiv).style.display = "block";
                         if (document.getElementById("followcheck").checked) {
@@ -99,15 +108,27 @@
 
         function stopFollow(){
             if (window.scrollY < document.body.scrollHeight - window.innerHeight){
-                document.getElementById("followcheck").checked = false
+                document.getElementById("followcheck").checked = false;
             }
         }
         function startFollow(){
             window.scrollTo(0,document.body.scrollHeight);
-            document.getElementById("followcheck").checked = true
+            document.getElementById("followcheck").checked = true;
         }
 
     </script>
+    <title>coredns/ci Integration Test Log</title>
+    <style type="text/css">
+        body {
+            background-color: #333333;
+        }
+        a, pre, input, body{
+            font-family: monospace;
+            font-size: 10pt;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body onLoad="sendRequest()" onscroll="stopFollow()">
 <span style="position:fixed;top:2%;right:2%">
