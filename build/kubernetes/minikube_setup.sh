@@ -41,6 +41,3 @@ kubectl proxy --port=8080 2> /dev/null &
 echo -n $! > /var/run/kubectl_proxy.pid
 sleep 3
 
-#
-# minikube_setup.sh (complete)
-#
