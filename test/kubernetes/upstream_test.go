@@ -31,7 +31,6 @@ func TestUpstreamToSelf(t *testing.T) {
     }
 `
 
-	println(corefile)
 	err := LoadCorefileAndZonefile(corefile, ExampleNet)
 	if err != nil {
 		t.Fatalf("Could not load corefile: %s", err)
