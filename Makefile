@@ -2,6 +2,8 @@ test-coredns: fetch-coredns-pr build-docker start-k8s test-k8s
 
 test-deployment: fetch-deployment-pr fetch-coredns start-k8s test-k8s-deployment
 
+test-kubernetai: fetch-kubernetai-pr fetch-coredns start-k8s test-kubernetai
+
 .PHONY: fetch-coredns-pr
 fetch-coredns-pr:
 	mkdir -p ${GOPATH}/src/${COREDNSPATH}
@@ -26,6 +28,15 @@ fetch-deployment-pr:
 	cd ${GOPATH}/src/${COREDNSPATH} && \
 	  git clone https://${COREDNSREPO}/deployment.git && \
 	  cd deployment && \
+	  git fetch origin +refs/pull/${PR}/merge:pr-${PR} && \
+	  git checkout pr-${PR}
+
+.PHONY: fetch-kubernetai-pr
+fetch-kubernetai-pr:
+	mkdir -p ${GOPATH}/src/${COREDNSPATH}
+	cd ${GOPATH}/src/${COREDNSPATH} && \
+	  git clone https://${COREDNSREPO}/kubernetai.git && \
+	  cd kubernetai && \
 	  git fetch origin +refs/pull/${PR}/merge:pr-${PR} && \
 	  git checkout pr-${PR}
 
@@ -55,6 +66,11 @@ test-k8s:
 test-k8s-deployment:
 	# Integration tests
 	go test -v ./test/k8sdeployment/...
+
+.PHONY: test-kubernetai
+test-kubernetai:
+	# Integration tests
+	go test -v ./test/kubernetai/...
 
 .PHONY: clean-k8s
 clean-k8s:
