@@ -2,7 +2,7 @@ test-coredns: fetch-coredns-pr build-docker start-k8s test-k8s
 
 test-deployment: fetch-deployment-pr fetch-coredns start-k8s test-k8s-deployment
 
-test-kubernetai: fetch-kubernetai-pr fetch-coredns build-kubernetai-docker start-k8s test-kubernetai
+test-kubernetai: fetch-kubernetai-pr fetch-coredns build-kubernetai-docker start-k8s go-test-kubernetai
 
 .PHONY: fetch-coredns-pr
 fetch-coredns-pr:
@@ -77,8 +77,8 @@ test-k8s-deployment:
 	# Integration tests
 	go test -v ./test/k8sdeployment/...
 
-.PHONY: test-kubernetai
-test-kubernetai:
+.PHONY: go-test-kubernetai
+go-test-kubernetai:
 	# Integration tests
 	go test -v ./test/kubernetai/...
 
