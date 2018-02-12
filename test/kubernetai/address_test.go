@@ -11,7 +11,7 @@ import (
 )
 
 var dnsTestCases = []test.Case{
-	{ // Query service served by last stanza
+	{ // Query service served by third stanza
 		Qname: "svc-1-a.test-1.svc.conglomeration.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
@@ -26,7 +26,7 @@ var dnsTestCases = []test.Case{
 		},
 	},
 	{ // Query service served by second stanza via fallthrough
-		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
+		Qname: "kubernetes.default.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
 			test.A("kubernetes.default.svc.cluster.local.      20    IN      A       10.0.0.1"),
@@ -39,7 +39,7 @@ var dnsTestCases = []test.Case{
 			test.PTR("100.0.0.10.in-addr.arpa. 10	IN	PTR	svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
-	{ // A PTR record in second stanza
+	{ // A PTR record in second stanza via fallthrough
 		Qname: "1.0.0.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
