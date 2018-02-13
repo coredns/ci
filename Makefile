@@ -2,6 +2,8 @@ test-coredns: fetch-coredns-pr build-docker start-k8s test-k8s
 
 test-deployment: fetch-deployment-pr fetch-coredns start-k8s test-k8s-deployment
 
+test-kubernetai: fetch-kubernetai-pr fetch-coredns build-kubernetai-docker start-k8s go-test-kubernetai
+
 .PHONY: fetch-coredns-pr
 fetch-coredns-pr:
 	mkdir -p ${GOPATH}/src/${COREDNSPATH}
@@ -29,14 +31,36 @@ fetch-deployment-pr:
 	  git fetch origin +refs/pull/${PR}/merge:pr-${PR} && \
 	  git checkout pr-${PR}
 
-.PHONY: build-docker
-build-docker:
+.PHONY: fetch-kubernetai-pr
+fetch-kubernetai-pr:
+	mkdir -p ${GOPATH}/src/${COREDNSPATH}
+	cd ${GOPATH}/src/${COREDNSPATH} && \
+	  git clone https://${COREDNSREPO}/kubernetai.git && \
+	  cd kubernetai && \
+	  git fetch origin +refs/pull/${PR}/merge:pr-${PR} && \
+	  git checkout pr-${PR}
+
+.PHONY: start-image-repo
+start-image-repo:
 	# Start local docker image repo
 	-docker run -d -p 5000:5000 --restart=always --name registry registry:2.6.2 || true
 
+.PHONY: build-docker
+build-docker: start-image-repo
 	# Build coredns docker image, and push to local repo
 	cd ${GOPATH}/src/${COREDNSPATH}/coredns && \
 	  ${MAKE} coredns SYSTEM="GOOS=linux" && \
+	  docker build -t coredns . && \
+	  docker tag coredns localhost:5000/coredns && \
+	  docker push localhost:5000/coredns
+
+.PHONY: build-kubernetai-docker
+build-kubernetai-docker: start-image-repo
+	# Build coredns+kubernetai docker image, and push to local repo
+	cd ${GOPATH}/src/${COREDNSPATH}/kubernetai && \
+	  ${MAKE} coredns SYSTEM="GOOS=linux" && \
+	  mv ./coredns ../coredns/ && \
+	  cd ../coredns/ && \
 	  docker build -t coredns . && \
 	  docker tag coredns localhost:5000/coredns && \
 	  docker push localhost:5000/coredns
@@ -55,6 +79,11 @@ test-k8s:
 test-k8s-deployment:
 	# Integration tests
 	go test -v ./test/k8sdeployment/...
+
+.PHONY: go-test-kubernetai
+go-test-kubernetai:
+	# Integration tests
+	go test -v ./test/kubernetai/...
 
 .PHONY: clean-k8s
 clean-k8s:
