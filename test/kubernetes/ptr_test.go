@@ -31,23 +31,23 @@ var dnsTestCasesPTR = []test.Case{
 			test.PTR("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa. 303 IN PTR 1234-abcd--1.headless-svc.test-1.svc.cluster.local."),
 		},
 	},
-	{ // A PTR record query for an existing service in an UNEXPOSED namespace should return NODATA
+	{ // A PTR record query for an existing service in an UNEXPOSED namespace should return NXDOMAIN
 		Qname: "120.0.0.10.in-addr.arpa.", Qtype: dns.TypePTR,
-		Rcode: dns.RcodeSuccess,
+		Rcode: dns.RcodeNameError,
 		Ns: []dns.RR{
 			test.SOA("0.0.10.in-addr.arpa.	303	IN	SOA	ns.dns.0.0.10.in-addr.arpa. hostmaster.0.0.10.in-addr.arpa. 1510339777 7200 1800 86400 30"),
 		},
 	},
-	{ // A PTR record query for an existing endpoint in an UNEXPOSED namespace should return NODATA
+	{ // A PTR record query for an existing endpoint in an UNEXPOSED namespace should return NXDOMAIN
 		Qname: "252.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
-		Rcode: dns.RcodeSuccess,
+		Rcode: dns.RcodeNameError,
 		Ns: []dns.RR{
 			test.SOA("0.17.172.in-addr.arpa.	303	IN	SOA	ns.dns.0.17.172.in-addr.arpa. hostmaster.0.17.172.in-addr.arpa. 1510339711 7200 1800 86400 30"),
 		},
 	},
-	{ // A PTR record query for an ip address that is not a service or endpoint should return NODATA
+	{ // A PTR record query for an ip address that is not a service or endpoint should return NXDOMAIN
 		Qname: "200.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
-		Rcode: dns.RcodeSuccess,
+		Rcode: dns.RcodeNameError,
 		Ns: []dns.RR{
 			test.SOA("0.17.172.in-addr.arpa.	303	IN	SOA	ns.dns.0.17.172.in-addr.arpa. hostmaster.0.17.172.in-addr.arpa. 1510339711 7200 1800 86400 30"),
 		},
