@@ -206,4 +206,17 @@ spec:
   - name: c-port
     port: 1234
     protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: upriver
+  namespace: test-2
+spec:
+  type: ExternalName
+  externalName: up.river.local
+  ports:
+  - name: c-port
+    port: 1234
+    protocol: UDP
 
