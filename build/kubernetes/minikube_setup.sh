@@ -16,7 +16,7 @@ touch $HOME/.kube/config
 
 export KUBECONFIG=$HOME/.kube/config
 
-minikube start --vm-driver=none --kubernetes-version=${K8S_VERSION}
+minikube start --vm-driver=none
 
 # Wait for minkube's api service to be ready
 for i in {1..60} # timeout for 2 minutes
