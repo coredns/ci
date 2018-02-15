@@ -101,8 +101,8 @@ func TestUpstreamLoopBreak(t *testing.T) {
 			Qname: "upriver.test-2.svc.cluster.local.", Qtype: dns.TypeA,
 			Rcode: dns.RcodeSuccess,
 			Answer: []dns.RR{
-				test.CNAME("up.river.local                     303  IN  CNAME  upriver.test-2.svc.cluster.local."),
 				test.CNAME("upriver.test-2.svc.cluster.local.  303  IN  CNAME  up.river.local."),
+				test.CNAME("up.river.local                     303  IN  CNAME  upriver.test-2.svc.cluster.local."),
 			},
 		},
 	}
