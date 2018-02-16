@@ -11,8 +11,7 @@ fetch-coredns-pr:
 	  git clone https://${COREDNSREPO}/coredns.git && \
 	  cd coredns && \
 	  git fetch origin +refs/pull/${PR}/merge:pr-${PR} && \
-	  git checkout pr-${PR} && \
-	  go get
+	  git checkout pr-${PR}
 
 .PHONY: fetch-coredns
 fetch-coredns:
