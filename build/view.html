@@ -43,6 +43,24 @@
             return s;
         }
 
+        // colorize headers if their sections contain errors
+        function highlightErrorDivs(){
+            for (i=0; i <= lastDiv; i++) {
+                var x = document.getElementById(i);
+                var s = x.innerHTML
+                if (s.match(/SKIP/)){
+                    var hdr = document.getElementById("hdr"+i);
+                    hdr.style.color="yellow";
+                }
+                if (s.match(/FAIL/)){
+                    var hdr = document.getElementById("hdr"+i);
+                    hdr.style.color="red";
+                    //var block = document.getElementById(i);
+                    //block.style.display = "block";
+                }
+            }
+        }
+
         // Divide log into collapsible divs
         function insertCollapsibleDivs(s){
             var i = 0;
@@ -55,7 +73,7 @@
                 }
                 // Replace (one at a time) comments that start with a capital letter
                 // with a toggle and collapsible div
-                var t = s.replace(/#+ ([A-Z][^\n#]*)[^\n]*/, "</pre></div><br><a href='javascript:void(0)' onclick='toggle("+i+")'>(+/-) $1</a><div id="+i+" style='display: "+display+"'><pre>");
+                var t = s.replace(/#+ ([A-Z][^\n#]*)[^\n]*/, "</pre></div><br><a href='javascript:void(0)' onmouseover='this.style.backgroundColor=\"grey\"' onmouseout='this.style.backgroundColor=\"#333333\"' onclick='toggle("+i+")' id=hdr"+i+">(+/-) $1</a><div id="+i+" style='margin-left:50px;display: "+display+"'><pre>");
                 // If nothing changed this time, we're done
                 if (s == t) {
                     break;
@@ -83,6 +101,7 @@
                         log = response;
                         document.getElementById("log").innerHTML = response;
                         document.getElementById(lastDiv).style.display = "block";
+                        highlightErrorDivs();
                         if (document.getElementById("followcheck").checked) {
                             window.scrollTo(0,document.body.scrollHeight);
                         }
@@ -136,5 +155,7 @@
 	<a href='javascript:document.location = pr+".txt"'>raw log</a>
 </span>
 <span id="log"></span>
+<br>
+<span style="font-size:8pt">Click on headers above to expand/collapse log sections.</span>
 </body>
 </html>
