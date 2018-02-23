@@ -73,7 +73,7 @@
                 }
                 // Replace (one at a time) comments that start with a capital letter
                 // with a toggle and collapsible div
-                var t = s.replace(/#+ ([A-Z][^\n#]*)[^\n]*/, "</pre></div><br><a href='javascript:void(0)' onclick='toggle("+i+")'>(+/-) $1</a><div id="+i+" style='display: "+display+"'><pre>");
+                var t = s.replace(/#+ ([A-Z][^\n#]*)[^\n]*/, "</pre></div><br><a href='javascript:void(0)' onmouseover='this.style.backgroundColor=\"grey\"' onmouseout='this.style.backgroundColor=\"#333333\"' onclick='toggle("+i+")' id=hdr"+i+">(+/-) $1</a><div id="+i+" style='margin-left:50px;display: "+display+"'><pre>");
                 // If nothing changed this time, we're done
                 if (s == t) {
                     break;
