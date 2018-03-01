@@ -35,10 +35,10 @@
 
         // colorize pass/failure text
         function colorize(s){
+            s = s.replace(/(Makefile:[^\n]*failed)/g, "<span style='color:red;'>$1</span>");
             s = s.replace(/(FAIL)/g, "<span style='color:red;'>$1</span>");
-            s = s.replace(/(FAILED)/ig, "<span style='color:red;'>$1</span>");
-            s = s.replace(/(PASS)/g, "<span style='color:green;'>$1</span>");
             s = s.replace(/(PASSED)/ig, "<span style='color:green;'>$1</span>");
+            s = s.replace(/(PASS)/g, "<span style='color:green;'>$1</span>");
             s = s.replace(/(SKIP)/g, "<span style='color:yellow;'>$1</span>");
             return s;
         }
@@ -52,11 +52,9 @@
                     var hdr = document.getElementById("hdr"+i);
                     hdr.style.color="yellow";
                 }
-                if (s.match(/FAIL/)){
+                if (s.match(/FAIL/) || s.match(/Makefile:[^\n]*failed/)){
                     var hdr = document.getElementById("hdr"+i);
                     hdr.style.color="red";
-                    //var block = document.getElementById(i);
-                    //block.style.display = "block";
                 }
             }
         }
