@@ -159,7 +159,7 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	}
 
 	// force coredns pod reload the config
-	Kubectl("-n kube-system delete pods -l k8s-app=coredns")
+	Kubectl("-n kube-system delete pods -l k8s-app=kube-dns")
 
 	return WaitReady(30)
 }
@@ -174,7 +174,7 @@ func WaitNReady(maxWait, n int) error {
 
 	running := 0
 	for {
-		o, _ := Kubectl("-n kube-system get pods -l k8s-app=coredns")
+		o, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns")
 		if strings.Count(o, "Running") == n {
 			running += 1
 		}
@@ -195,7 +195,7 @@ func WaitNReady(maxWait, n int) error {
 
 // CorednsLogs returns the current coredns log
 func CorednsLogs() string {
-	name, _ := Kubectl("-n kube-system get pods -l k8s-app=coredns | grep Running | cut -f1 -d' ' | tr -d '\n'")
+	name, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns | grep Running | cut -f1 -d' ' | tr -d '\n'")
 	logs, _ := Kubectl("-n kube-system logs " + name)
 	return (logs)
 }
@@ -215,7 +215,7 @@ func prepForConfigMap(config string) string {
 
 // CoreDNSPodIPs return the ips of all coredns pods
 func CoreDNSPodIPs() ([]string, error) {
-	lines, err := Kubectl("-n kube-system get pods -l k8s-app=coredns -o wide | awk '{print $6}' | tail -n+2")
+	lines, err := Kubectl("-n kube-system get pods -l k8s-app=kube-dns -o wide | awk '{print $6}' | tail -n+2")
 	if err != nil {
 		return nil, err
 	}
