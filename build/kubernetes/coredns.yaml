@@ -48,7 +48,7 @@ data:
   Corefile: |
     .:53 {
         errors
-        kubernetes cluster.local 10.0.0.0/8
+        kubernetes cluster.local 10.96.0.0/8
     }
   Zonefile: |
 
@@ -113,7 +113,7 @@ metadata:
 spec:
   selector:
     k8s-app: kube-dns
-  clusterIP: 10.0.0.10
+  clusterIP: 10.96.0.10
   ports:
   - name: dns
     port: 53

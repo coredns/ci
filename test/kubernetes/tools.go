@@ -34,6 +34,7 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 	for {
 		cmdout, err = Kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
 		if err == nil {
+			println("dig query: " + cmdout)
 			break
 		}
 		tries = tries - 1
@@ -255,6 +256,9 @@ func ParseDigResponse(r string) ([]*dns.Msg, error) {
 		m, err := parseDig(s)
 		if err != nil {
 			break
+		}
+		if m == nil {
+			return nil, errors.New("Unexpected nil message")
 		}
 		msgs = append(msgs, m)
 	}

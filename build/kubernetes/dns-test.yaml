@@ -74,7 +74,7 @@ metadata:
   name: svc-1-a
   namespace: test-1
 spec:
-  clusterIP: 10.0.0.100
+  clusterIP: 10.96.0.100
   ports:
   - name: http
     port: 80
@@ -107,7 +107,7 @@ metadata:
 spec:
   selector:
     app: app-1-b
-  clusterIP: 10.0.0.110
+  clusterIP: 10.96.0.110
   ports:
   - name: http
     port: 80
@@ -121,7 +121,7 @@ metadata:
 spec:
   selector:
     app: app-c
-  clusterIP: 10.0.0.115
+  clusterIP: 10.96.0.115
   ports:
   - name: c-port
     port: 1234
@@ -135,7 +135,7 @@ metadata:
 spec:
   selector:
     app: app-c
-  clusterIP: 10.0.0.120
+  clusterIP: 10.96.0.120
   ports:
   - name: c-port
     port: 1234
@@ -147,7 +147,7 @@ metadata:
   name: svc-d
   namespace: test-2
 spec:
-  clusterIP: 10.0.0.121
+  clusterIP: 10.96.0.121
   ports:
   - name: c-port
     port: 1234
