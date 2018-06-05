@@ -15,14 +15,14 @@ var autopathTests = []test.Case{
 		Qname: "svc-1-a", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
 		},
 	},
 	{ // Valid service name + namespace -> success on 2nd search in path -> CNAME glue + A record
 		Qname: "svc-1-a.test-1", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
 			test.CNAME("svc-1-a.test-1.test-1.svc.cluster.local.  303    IN	     CNAME	  svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
@@ -30,7 +30,7 @@ var autopathTests = []test.Case{
 		Qname: "svc-1-a.test-1.svc", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
 			test.CNAME("svc-1-a.test-1.svc.test-1.svc.cluster.local.  303    IN	     CNAME	  svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
@@ -38,7 +38,7 @@ var autopathTests = []test.Case{
 		Qname: "svc-1-a.test-1.svc.cluster.local", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
 			test.CNAME("svc-1-a.test-1.svc.cluster.local.test-1.svc.cluster.local.  303    IN	     CNAME	  svc-1-a.test-1.svc.cluster.local."),
 		},
 	},

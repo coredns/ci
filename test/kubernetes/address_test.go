@@ -14,7 +14,7 @@ var dnsTestCasesA = []test.Case{
 		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.      5    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.      5    IN      A       10.96.0.100"),
 		},
 	},
 	{ // An A record query for an existing headless service should return a record for each of its ipv4 endpoints
@@ -43,16 +43,16 @@ var dnsTestCasesA = []test.Case{
 		Qname: "svc-1-a.*.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.*.svc.cluster.local.      303    IN      A       10.0.0.100"),
+			test.A("svc-1-a.*.svc.cluster.local.      303    IN      A       10.96.0.100"),
 		},
 	},
 	{ // A wild card service name in an exposed namespace should result in all records
 		Qname: "*.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
-			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.0.0.110"),
-			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.0.0.115"),
+			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
+			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.96.0.110"),
+			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.96.0.115"),
 			test.A("*.test-1.svc.cluster.local.      303    IN      A       172.17.0.254"),
 			test.A("*.test-1.svc.cluster.local.      303    IN      A       172.17.0.255"),
 			test.CNAME("*.test-1.svc.cluster.local.  303    IN      CNAME   example.net."),

@@ -40,15 +40,15 @@ cluster.local.	303	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 150231
 
 ;; ANSWER SECTION:
 cname.test-1.svc.cluster.local.		5	IN	CNAME	svc-1-a.test-1.svc.cluster.local.
-svc-1-a.test-1.svc.cluster.local.		5	IN	A	10.0.0.100
-svc-2-a.test-1.svc.cluster.local.		5	IN	A	10.0.0.101
+svc-1-a.test-1.svc.cluster.local.		5	IN	A	10.96.0.100
+svc-2-a.test-1.svc.cluster.local.		5	IN	A	10.96.0.101
 
 ;; AUTHORITY SECTION:
 cluster.local.	303	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1502313310 7200 1800 86400 60
 
 ;; ADDITIONAL SECTION:
-svc-1-a.test-1.svc.cluster.local.		5	IN	A	10.0.0.100
-svc-2-a.test-1.svc.cluster.local.		5	IN	A	10.0.0.101
+svc-1-a.test-1.svc.cluster.local.		5	IN	A	10.96.0.100
+svc-2-a.test-1.svc.cluster.local.		5	IN	A	10.96.0.101
 
 ;; Query time: 4 msec
 ;; SERVER: 64.207.129.21#53(64.207.129.21)
@@ -68,15 +68,15 @@ svc-2-a.test-1.svc.cluster.local.		5	IN	A	10.0.0.101
 			Rcode: dns.RcodeSuccess,
 			Answer: []dns.RR{
 				test.CNAME("cname.test-1.svc.cluster.local.      303    IN      CNAME       svc-1-a.test-1.svc.cluster.local."),
-				test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
-				test.A("svc-2-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.101"),
+				test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
+				test.A("svc-2-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.101"),
 			},
 			Ns: []dns.RR{
 				test.SOA("cluster.local.	303	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1502313310 7200 1800 86400 60"),
 			},
 			Extra: []dns.RR{
-				test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
-				test.A("svc-2-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.101"),
+				test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
+				test.A("svc-2-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.101"),
 			},
 		},
 	}
@@ -110,10 +110,10 @@ func TestParseDigResponse2(t *testing.T) {
 ;svc-1-a.test-1.svc.cluster.local. IN	A
 
 ;; ANSWER SECTION:
-svc-1-a.test-1.svc.cluster.local. 5 IN	A	10.0.0.100
+svc-1-a.test-1.svc.cluster.local. 5 IN	A	10.96.0.100
 
 ;; Query time: 0 msec
-;; SERVER: 10.0.0.10#53(10.0.0.10)
+;; SERVER: 10.96.0.10#53(10.96.0.10)
 ;; WHEN: Tue Jun 05 13:53:41 UTC 2018
 ;; MSG SIZE  rcvd: 89
 `
@@ -123,7 +123,7 @@ svc-1-a.test-1.svc.cluster.local. 5 IN	A	10.0.0.100
 			Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 			Rcode: dns.RcodeSuccess,
 			Answer: []dns.RR{
-				test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
+				test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
 			},
 		},
 	}

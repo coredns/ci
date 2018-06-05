@@ -19,7 +19,7 @@ var deploymentDNSCases = []test.Case{
 		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.      5    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.      5    IN      A       10.96.0.100"),
 		},
 	},
 	{ // A query for an ip-style pod dns name should return a record
@@ -69,7 +69,7 @@ func TestKubernetesDeployment(t *testing.T) {
 	t.Run("Deploy_with_deploy.sh", func(t *testing.T) {
 		// Apply manifests via coredns/deployment deployment script ...
 		path := os.Getenv("DEPLOYMENTPATH")
-		cmd := exec.Command("sh", "-c", "./deploy.sh  -i 10.0.0.10 -r 10.0.0.0/8 -r 172.17.0.0/16 | kubectl apply -f -")
+		cmd := exec.Command("sh", "-c", "./deploy.sh  -i 10.96.0.10 -r 10.96.0.0/8 -r 172.17.0.0/16 | kubectl apply -f -")
 		cmd.Dir = path + "/kubernetes"
 		cmdout, err := cmd.CombinedOutput()
 		print(string(cmdout))
