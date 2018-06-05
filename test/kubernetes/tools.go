@@ -34,7 +34,6 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 	for {
 		cmdout, err = Kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
 		if err == nil {
-			println("dig query: " + cmdout)
 			break
 		}
 		tries = tries - 1
