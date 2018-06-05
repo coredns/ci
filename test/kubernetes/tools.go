@@ -42,7 +42,9 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
+	println("DEBUG: "+cmdout)
 	results, err := ParseDigResponse(cmdout)
+
 	if err != nil {
 		return nil, errors.New("failed to parse result: (" + err.Error() + ")" + cmdout)
 	}
