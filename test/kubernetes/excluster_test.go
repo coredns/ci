@@ -25,7 +25,7 @@ func TestKubernetesSecureAPI(t *testing.T) {
 	corefile :=
 		`.:0 {
     kubernetes cluster.local {
-        endpoint https://127.0.0.1:8443
+        endpoint https://minikube:8443
         tls /root/.minikube/client.crt /root/.minikube/client.key /root/.minikube/ca.crt 
     }`
 
@@ -90,7 +90,7 @@ func TestKubernetesSecureAPIFallthrough(t *testing.T) {
 	corefile :=
 		`.:0 {
     kubernetes cluster.local {
-        endpoint https://nonexistance:8443 https://invalidip:8443 https://127.0.0.1:8443
+        endpoint https://nonexistance:8443 https://invalidip:8443 https://minikube:8443
         tls /root/.minikube/client.crt /root/.minikube/client.key /root/.minikube/ca.crt 
     }`
 
