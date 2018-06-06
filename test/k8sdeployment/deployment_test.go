@@ -30,10 +30,10 @@ var deploymentDNSCases = []test.Case{
 		},
 	},
 	{ // A PTR record query for an existing service should return a record
-		Qname: "100.0.0.10.in-addr.arpa.", Qtype: dns.TypePTR,
+		Qname: "100.0.96.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.PTR("100.0.0.10.in-addr.arpa. 303	IN	PTR	svc-1-a.test-1.svc.cluster.local."),
+			test.PTR("100.0.96.10.in-addr.arpa. 303	IN	PTR	svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
 	{ // A PTR record query for an existing endpoint should return a record

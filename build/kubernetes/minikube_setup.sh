@@ -30,6 +30,7 @@ done
 
 # Disable kube-dns in addon manager
 minikube addons disable kube-dns 2> /dev/null
+kubectl delete deployment kube-dns -n kube-system
 
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
