@@ -7,6 +7,7 @@ kill -9 `cat /var/run/kubectl_proxy.pid`
 
 # delete minikube instance
 minikube delete
+kubeadm reset
 
 # Delete the docker image repository
 docker stop registry
