@@ -15,7 +15,7 @@ var tests = []test.Case{
 		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
 		},
 	},
 }

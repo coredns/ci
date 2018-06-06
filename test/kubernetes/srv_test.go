@@ -24,7 +24,7 @@ var dnsTestCasesSRV = []test.Case{
 			test.SRV("*._TcP.svc-1-a.test-1.svc.cluster.local.	303	IN	SRV	 0  50   80 svc-1-a.test-1.svc.cluster.local."),
 		},
 		Extra: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.	303 	IN	A	10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.	303 	IN	A	10.96.0.100"),
 		},
 	},
 	{
@@ -42,7 +42,7 @@ var dnsTestCasesSRV = []test.Case{
 			test.SRV("*.any.svc-1-a.*.svc.cluster.local.      303    IN    SRV 0 50 80 svc-1-a.test-1.svc.cluster.local."),
 		},
 		Extra: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.	303	IN	A	10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.	303	IN	A	10.96.0.100"),
 		},
 	},
 	{
@@ -53,7 +53,7 @@ var dnsTestCasesSRV = []test.Case{
 			test.SRV("ANY.*.svc-1-a.any.svc.cluster.local.      303    IN    SRV 0 50 80 svc-1-a.test-1.svc.cluster.local."),
 		},
 		Extra: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.	303 	IN	A	10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.	303 	IN	A	10.96.0.100"),
 		},
 	},
 	{
@@ -85,7 +85,7 @@ var dnsTestCasesSRV = []test.Case{
 			test.AAAA("1234-abcd--2.headless-svc.test-1.svc.cluster.local.     303       IN      AAAA    1234:abcd::2"),
 			test.A("172-17-0-254.headless-svc.test-1.svc.cluster.local.	303	IN	A	172.17.0.254"),
 			test.A("172-17-0-255.headless-svc.test-1.svc.cluster.local.	303	IN	A	172.17.0.255"),
-			test.A("svc-c.test-1.svc.cluster.local.	303	IN	A	10.0.0.115"),
+			test.A("svc-c.test-1.svc.cluster.local.	303	IN	A	10.96.0.115"),
 		},
 	},
 	{
@@ -97,8 +97,8 @@ var dnsTestCasesSRV = []test.Case{
 			test.SRV("*._tcp.any.test-1.svc.cluster.local.      303    IN    SRV 0 33 80  svc-1-b.test-1.svc.cluster.local."),
 		},
 		Extra: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.	303	IN	A	10.0.0.100"),
-			test.A("svc-1-b.test-1.svc.cluster.local.	303	IN	A	10.0.0.110"),
+			test.A("svc-1-a.test-1.svc.cluster.local.	303	IN	A	10.96.0.100"),
+			test.A("svc-1-b.test-1.svc.cluster.local.	303	IN	A	10.96.0.110"),
 		},
 	},
 	{
@@ -123,8 +123,8 @@ var dnsTestCasesSRV = []test.Case{
 			test.SRV("_http._tcp.*.*.svc.cluster.local.      303    IN    SRV 0 50 80 svc-1-b.test-1.svc.cluster.local."),
 		},
 		Extra: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.	303	IN	A	10.0.0.100"),
-			test.A("svc-1-b.test-1.svc.cluster.local.	303	IN	A	10.0.0.110"),
+			test.A("svc-1-a.test-1.svc.cluster.local.	303	IN	A	10.96.0.100"),
+			test.A("svc-1-b.test-1.svc.cluster.local.	303	IN	A	10.96.0.110"),
 		},
 	},
 	{
@@ -153,7 +153,7 @@ var dnsTestCasesSRV = []test.Case{
 			test.SRV("svc-1-a.test-1.svc.cluster.local.	303	IN	SRV	0 50 80 svc-1-a.test-1.svc.cluster.local."),
 		},
 		Extra: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.	303	IN	A	10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.	303	IN	A	10.96.0.100"),
 		},
 	},
 }

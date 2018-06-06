@@ -15,35 +15,35 @@ var dnsTestCases = []test.Case{
 		Qname: "svc-1-a.test-1.svc.conglomeration.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.conglomeration.local.      30    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.conglomeration.local.      30    IN      A       10.96.0.100"),
 		},
 	},
 	{ // Query service served by first stanza
 		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("svc-1-a.test-1.svc.cluster.local.      10    IN      A       10.0.0.100"),
+			test.A("svc-1-a.test-1.svc.cluster.local.      10    IN      A       10.96.0.100"),
 		},
 	},
 	{ // Query service served by second stanza via fallthrough
 		Qname: "kubernetes.default.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("kubernetes.default.svc.cluster.local.      20    IN      A       10.0.0.1"),
+			test.A("kubernetes.default.svc.cluster.local.      20    IN      A       10.96.0.1"),
 		},
 	},
 	{ // A PTR record in first stanza
-		Qname: "100.0.0.10.in-addr.arpa.", Qtype: dns.TypePTR,
+		Qname: "100.0.96.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.PTR("100.0.0.10.in-addr.arpa. 10	IN	PTR	svc-1-a.test-1.svc.cluster.local."),
+			test.PTR("100.0.96.10.in-addr.arpa. 10	IN	PTR	svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
 	{ // A PTR record in second stanza via fallthrough
-		Qname: "1.0.0.10.in-addr.arpa.", Qtype: dns.TypePTR,
+		Qname: "1.0.96.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.PTR("1.0.0.10.in-addr.arpa. 20	IN	PTR	kubernetes.default.svc.cluster.local."),
+			test.PTR("1.0.96.10.in-addr.arpa. 20	IN	PTR	kubernetes.default.svc.cluster.local."),
 		},
 	},
 }
