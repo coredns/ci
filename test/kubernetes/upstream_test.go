@@ -134,6 +134,8 @@ func TestUpstreamLoopBreak(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
+			// Dedup any duplicates that the template plugin may create
+			res.Answer = dns.Dedup(res.Answer, nil)
 			test.SortAndCheck(t, res, tc)
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
