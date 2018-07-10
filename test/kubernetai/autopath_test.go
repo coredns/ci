@@ -107,7 +107,10 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
 			res, err := kubernetes.DoIntegrationTest(tc, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Fatal(err.Error())
+			}
+			if res == nil {
+				t.Fatal("unexpected nil response")
 			}
 			test.CNAMEOrder(t, res)
 			test.SortAndCheck(t, res, tc)
