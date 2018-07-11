@@ -3,6 +3,7 @@ package kubernetai
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/coredns/ci/test/kubernetes"
 	"github.com/coredns/coredns/plugin/test"
@@ -100,6 +101,7 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 	testCases := autopathTests
 	namespace := "test-1"
 	err = kubernetes.StartClientPod(namespace)
+	time.Sleep(time.Second * 5) // Give k8s time to report the new pod to CoreDNS
 	if err != nil {
 		t.Fatalf("failed to start client pod: %s", err)
 	}
