@@ -48,6 +48,10 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 		return nil, errors.New("failed to parse result: (" + err.Error() + ")" + cmdout)
 	}
 	if len(results) != 1 {
+		for i, r := range results {
+			fmt.Printf("Response %v\n", i)
+			fmt.Println(r.String())
+		}
 		return nil, errors.New("expected 1 query attempt, observed " + strconv.Itoa(len(results)))
 	}
 	return results[0], nil
