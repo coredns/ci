@@ -101,7 +101,6 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 	testCases := autopathTests
 	namespace := "test-1"
 	err = kubernetes.StartClientPod(namespace)
-	time.Sleep(time.Second * 5) // Give k8s time to report the new pod to CoreDNS
 	if err != nil {
 		t.Fatalf("failed to start client pod: %s", err)
 	}
@@ -120,5 +119,8 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 				t.Errorf("coredns log: %s", kubernetes.CorednsLogs())
 			}
 		})
+	}
+	if t.Failed() {
+		time.Sleep(time.Minute * 15) // window for debug
 	}
 }
