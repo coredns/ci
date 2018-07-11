@@ -109,9 +109,11 @@ func WaitForClientPodRecord(namespace string) error {
 	maxWait := 120 // 120 seconds
 	for {
 		dashedip, err := Kubectl("-n " + namespace + " get pod " + clientName + " | grep " + clientName + " | awk 'print $6' | tr . -")
+		println("got ip: " + dashedip)
 		if err == nil && dashedip != "" {
-			hostout, err := Kubectl("-n " + namespace + " exec " + clientName + " -- dig -t a " + dashedip + "." + namespace + ".pod.cluster.local. +short")
-			if err == nil && strings.Contains(hostout, "has address") {
+			digout, err := Kubectl("-n " + namespace + " exec " + clientName + " -- dig -t a " + dashedip + "." + namespace + ".pod.cluster.local. +short")
+			println("got digout: " + digout)
+			if err == nil && strings.Contains(digout, "has address") {
 				return nil
 			}
 		}
