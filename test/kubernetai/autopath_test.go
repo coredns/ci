@@ -3,8 +3,6 @@ package kubernetai
 import (
 	"fmt"
 	"testing"
-	"time"
-
 	"github.com/coredns/ci/test/kubernetes"
 	"github.com/coredns/coredns/plugin/test"
 
@@ -124,8 +122,5 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 				t.Errorf("coredns log: %s", kubernetes.CorednsLogs())
 			}
 		})
-	}
-	if t.Failed() {
-		time.Sleep(time.Minute * 15) // window for debug
 	}
 }
