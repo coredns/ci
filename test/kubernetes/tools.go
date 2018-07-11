@@ -110,7 +110,7 @@ func WaitForClientPodRecord(namespace string) error {
 	for {
 		dashedip, err := Kubectl("-n " + namespace + " get pod " + clientName + " | grep " + clientName + " | awk 'print $6' | tr . -")
 		if err == nil && dashedip != "" {
-			hostout, err := Kubectl("-n " + namespace + " exec " + clientName + " -- host -t a " + dashedip + "." + namespace + ".pod.cluster.local.")
+			hostout, err := Kubectl("-n " + namespace + " exec " + clientName + " -- dig -t a " + dashedip + "." + namespace + ".pod.cluster.local. +short")
 			if err == nil && strings.Contains(hostout, "has address") {
 				return nil
 			}
