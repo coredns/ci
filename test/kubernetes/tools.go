@@ -111,9 +111,11 @@ func WaitForClientPodRecord(namespace string) error {
 		dashedip, err := Kubectl("-n " + namespace + " get pods -o wide " + clientName + " | grep " + clientName + " | awk '{print $6}' | tr . -")
 		println("got ip: " + dashedip)
 		if err == nil && dashedip != "" {
-			digout, err := Kubectl("-n " + namespace + " exec " + clientName + " -- dig -t a " + dashedip + "." + namespace + ".pod.cluster.local. +short")
-			println("got digout: " + digout)
-			if err == nil && strings.Contains(digout, "has address") {
+			digcmd := "dig -t a " + dashedip + "." + namespace + ".pod.cluster.local. +short"
+			digout, err := Kubectl("-n " + namespace + " exec " + clientName + " -- " + digcmd)
+			println("digcmd: " + digcmd)
+			println("digout: " + digout)
+			if err == nil && digout != "" {
 				return nil
 			}
 		}
