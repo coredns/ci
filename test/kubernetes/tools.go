@@ -104,6 +104,27 @@ func StartClientPod(namespace string) error {
 
 }
 
+// WaitForClientPodRecord waits for the client pod A record to be served by CoreDNS
+func WaitForClientPodRecord(namespace string) error {
+	maxWait := 120 // 120 seconds
+	for {
+		dashedip, err := Kubectl("-n " + namespace + " get pod " + clientName + " | grep " + clientName + " | awk 'print $6' | tr . -")
+		if err == nil && dashedip != "" {
+			hostout, err := Kubectl("-n " + namespace + " exec " + clientName + " -- host -t a " + dashedip + "." + namespace + ".pod.cluster.local.")
+			if err == nil && strings.Contains(hostout, "has address") {
+				return nil
+			}
+		}
+		// wait and try again until timeout
+		time.Sleep(time.Second)
+		maxWait = maxWait - 1
+		if maxWait == 0 {
+			break
+		}
+	}
+	return errors.New("timeout waiting for " + clientName + " A record.")
+}
+
 // UpstreamServer starts a local instance of coredns with the given zone file
 func UpstreamServer(t *testing.T, zone, zoneFile string) (func(), *caddy.Instance, string) {
 	upfile, rmFunc, err := intTest.TempFile(os.TempDir(), zoneFile)
