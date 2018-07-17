@@ -19,7 +19,6 @@ fetch-coredns:
 	cd ${GOPATH}/src/${COREDNSPATH} && \
 	  git clone https://${COREDNSREPO}/coredns.git && \
 	  cd coredns && \
-	  go get -v -d && \
 	  ${MAKE} godeps
 
 .PHONY: fetch-deployment-pr
@@ -58,6 +57,7 @@ build-docker: start-image-repo
 build-kubernetai-docker: start-image-repo
 	# Build coredns+kubernetai docker image, and push to local repo
 	cd ${GOPATH}/src/${COREDNSPATH}/kubernetai && \
+	  go get -v -d && \
 	  ${MAKE} coredns SYSTEM="GOOS=linux" && \
 	  mv ./coredns ../coredns/ && \
 	  cd ../coredns/ && \
