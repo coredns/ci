@@ -57,6 +57,7 @@ build-docker: start-image-repo
 build-kubernetai-docker: start-image-repo
 	# Build coredns+kubernetai docker image, and push to local repo
 	cd ${GOPATH}/src/${COREDNSPATH}/kubernetai && \
+	  go get -v -d && \
 	  ${MAKE} coredns SYSTEM="GOOS=linux" && \
 	  mv ./coredns ../coredns/ && \
 	  cd ../coredns/ && \
