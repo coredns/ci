@@ -48,7 +48,11 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 		return nil, errors.New("failed to parse result: (" + err.Error() + ")" + cmdout)
 	}
 	if len(results) != 1 {
-		return nil, errors.New("expected 1 query attempt, observed " + strconv.Itoa(len(results)))
+		resultStr := ""
+		for i, r := range results {
+			resultStr += fmt.Sprintf("\nResponse %v\n", i) + r.String()
+		}
+		return nil, errors.New("expected 1 query attempt, observed " + strconv.Itoa(len(results)) + resultStr)
 	}
 	return results[0], nil
 }
@@ -98,6 +102,28 @@ func StartClientPod(namespace string) error {
 	}
 	return errors.New("timeout waiting for " + clientName + " to be ready.")
 
+}
+
+// WaitForClientPodRecord waits for the client pod A record to be served by CoreDNS
+func WaitForClientPodRecord(namespace string) error {
+	maxWait := 120 // 120 seconds
+	for {
+		dashedip, err := Kubectl("-n " + namespace + " get pods -o wide " + clientName + " | grep " + clientName + " | awk '{print $6}' | tr . - | tr -d '\n'")
+		if err == nil && dashedip != "" {
+			digcmd := "dig -t a " + dashedip + "." + namespace + ".pod.cluster.local. +short | tr -d '\n'"
+			digout, err := Kubectl("-n " + namespace + " exec " + clientName + " -- " + digcmd)
+			if err == nil && digout != "" {
+				return nil
+			}
+		}
+		// wait and try again until timeout
+		time.Sleep(time.Second)
+		maxWait = maxWait - 1
+		if maxWait == 0 {
+			break
+		}
+	}
+	return errors.New("timeout waiting for " + clientName + " A record.")
 }
 
 // UpstreamServer starts a local instance of coredns with the given zone file

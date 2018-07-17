@@ -103,6 +103,11 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 	if err != nil {
 		t.Fatalf("failed to start client pod: %s", err)
 	}
+	err = kubernetes.WaitForClientPodRecord(namespace)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
 			res, err := kubernetes.DoIntegrationTest(tc, namespace)
