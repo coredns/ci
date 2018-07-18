@@ -69,7 +69,8 @@ func TestKubernetesDeployment(t *testing.T) {
 	t.Run("Deploy_with_deploy.sh", func(t *testing.T) {
 		// Apply manifests via coredns/deployment deployment script ...
 		path := os.Getenv("DEPLOYMENTPATH")
-		cmd := exec.Command("sh", "-c", "./deploy.sh  -i 10.96.0.10 -r 10.96.0.0/8 -r 172.17.0.0/16 | kubectl apply -f -")
+		cmd := exec.Command("sh", "-c", "./deploy.sh  -i 10.96.0.10 -r 10.96.0.0/8 -r 172.17.0.0/16")
+		exec.Command("sh", "-c","kubectl apply -f coredns.yaml").Run()
 		cmd.Dir = path + "/kubernetes"
 		cmdout, err := cmd.CombinedOutput()
 		if err != nil {
