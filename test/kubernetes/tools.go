@@ -191,6 +191,27 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	return WaitReady(30)
 }
 
+func LoadKubednsConfigmap(feddata, stubdata, upstreamdata string) error {
+
+	//apply configmap yaml
+	yamlString := KubednsConfigmap + "\n"
+	yamlString += "  upstreamNameservers: |\n" + prepForConfigMap(upstreamdata)
+	yamlString += "  federations: |\n" + prepForConfigMap(feddata)
+	yamlString += "  stubDomains: |\n" + prepForConfigMap(stubdata)
+
+	file, rmFunc, err := intTest.TempFile(os.TempDir(), yamlString)
+	if err != nil {
+		return err
+	}
+	defer rmFunc()
+
+	_, err = Kubectl("apply -f " + file)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // WaitReady waits for 1 coredns to be ready or times out after maxWait seconds with an error
 func WaitReady(maxWait int) error {
 	return WaitNReady(maxWait, 1)
@@ -416,6 +437,15 @@ metadata:
   name: coredns
   namespace: kube-system
 data:`
+
+	// KubednsConfigmap is the header used for defining the kube-dns configmap
+	KubednsConfigmap = `apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-dns
+  namespace: kube-system
+data:
+`
 
 	// ExampleNet is an example upstream zone file
 	ExampleNet = `; example.net. test file for cname tests
