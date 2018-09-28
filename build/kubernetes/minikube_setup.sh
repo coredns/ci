@@ -38,15 +38,17 @@ kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
 # Wait for pods in test-1 namespace to be Running
 for i in {1..60} # timeout after 1 minute
 do
-   test 4 -eq `kubectl get po -n test-1 | grep Running | wc -l`
-   if [ $? -ne 1 ]; then
-      break
+  readypods=`kubectl get po -n test-1 | grep Running | wc -l`
+  test
+  if [ 3 -eq ${readypods} ]; then
+    break
   fi
   sleep 1
 done
 
-if [ 4 -ne `kubectl get po -n test-1 | grep Running | wc -l` ]; then
-  echo "Timed out waiting for test-1 pods"
+if [ 3 -ne ${readypods} ]; then
+  echo "Timed out waiting for 3 pods in test-1. Saw $readypods."
+  kubectl get po -n test-1
   exit 1
 fi
 
