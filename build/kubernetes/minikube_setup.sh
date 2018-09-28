@@ -35,6 +35,16 @@ kubectl delete deployment kube-dns -n kube-system
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
 
+# Wait for pods in test-1 namespace to be Running
+for i in {1..60} # timeout after 1 minute
+do
+   test 4 -eq `kubectl get po -n test-1 | grep Running | wc -l`
+   if [ $? -ne 1 ]; then
+      break
+  fi
+  sleep 1
+done
+
 # Deploy coredns in place of kube-dns
 kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 
