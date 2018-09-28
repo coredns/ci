@@ -68,7 +68,7 @@ build-kubernetai-docker: start-image-repo
 .PHONY: start-k8s
 start-k8s:
 	# Set up minikube
-	-sh ./build/kubernetes/minikube_setup.sh
+	sh ./build/kubernetes/minikube_setup.sh
 
 .PHONY: test-k8s
 test-k8s:

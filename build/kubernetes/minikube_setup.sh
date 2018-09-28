@@ -45,6 +45,11 @@ do
   sleep 1
 done
 
+if [ 4 -ne `kubectl get po -n test-1 | grep Running | wc -l` ]; then
+  echo "Timed out waiting for test-1 pods"
+  exit 1
+fi
+
 # Deploy coredns in place of kube-dns
 kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 
