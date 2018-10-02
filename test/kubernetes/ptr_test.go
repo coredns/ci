@@ -17,14 +17,14 @@ var dnsTestCasesPTR = []test.Case{
 			test.PTR("100.0.96.10.in-addr.arpa. 303	IN	PTR	svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
-	{ // A PTR record query for an existing endpoint should return a record
-		Qname: "253.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
+	{ // A PTR record query for an existing endpoint of a headless service should return a record
+		Qname: "254.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.PTR("253.0.17.172.in-addr.arpa. 303	IN	PTR	172-17-0-253.svc-1-a.test-1.svc.cluster.local."),
+			test.PTR("254.0.17.172.in-addr.arpa. 303	IN	PTR	172-17-0-254.headless-svc.test-1.svc.cluster.local."),
 		},
 	},
-	{ // A PTR record query for an existing ipv6 endpoint should return a record
+	{ // A PTR record query for an existing ipv6 endpoint of a headless service should return a record
 		Qname: "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
