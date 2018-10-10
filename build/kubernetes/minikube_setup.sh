@@ -35,6 +35,10 @@ kubectl delete deployment kube-dns -n kube-system
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
 
+# Add federation labels to node
+kubectl label nodes minikube failure-domain.beta.kubernetes.io/zone=fdzone
+kubectl label nodes minikube failure-domain.beta.kubernetes.io/region=fdregion
+
 # Deploy coredns in place of kube-dns
 kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 
