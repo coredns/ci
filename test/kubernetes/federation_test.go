@@ -15,8 +15,8 @@ func TestFederation(t *testing.T) {
 			Qname: "fedsvc.default.testfed.svc.cluster.local.", Qtype: dns.TypeA,
 			Rcode: dns.RcodeSuccess,
 			Answer: []dns.RR{
-				test.CNAME("fedsvc.default.testfed.svc.cluster.local. 303  IN  CNAME  fedsvc.default.testfed.svc.X.Y.example.com."),
-				test.A("fedsvc.default.testfed.svc.X.Y.example.com. 303 IN A 1.2.3.4"),
+				test.CNAME("fedsvc.default.testfed.svc.cluster.local. 303  IN  CNAME  fedsvc.default.testfed.svc.fdzone.fdregion.example.com."),
+				test.A("fedsvc.default.testfed.svc.fdzone.fdregion.example.com. 303 IN A 1.2.3.4"),
 			},
 		},
 	}
@@ -24,12 +24,12 @@ func TestFederation(t *testing.T) {
         errors
         log
         kubernetes cluster.local
-		federation cluster.local {
-            upstream
-			testfed example.com
+        federation cluster.local {
+          upstream
+          testfed example.com
         }
         template ANY ANY example.com {
-          answer "fedsvc.default.testfed.svc.X.Y.example.com. 5 IN A 1.2.3.4"
+          answer "fedsvc.default.testfed.svc.fdzone.fdregion.example.com. 5 IN A 1.2.3.4"
         }
     }
 `
