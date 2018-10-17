@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	"github.com/coredns/coredns/plugin/test"
+	intTest "github.com/coredns/coredns/test"
 
 	"github.com/miekg/dns"
+	"os"
 )
 
 var dnsTestCasesA = []test.Case{
@@ -90,6 +92,49 @@ var dnsTestCasesA = []test.Case{
 	},
 }
 
+var newObjectTests = []test.Case{
+	{
+		Qname: "new-svc.test-1.svc.cluster.local.", Qtype: dns.TypeA,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.A("new-svc.test-1.svc.cluster.local.      5    IN      A       10.96.0.222"),
+		},
+	},
+	{
+		Qname: "172-17-0-222.new-svc.test-1.svc.cluster.local.", Qtype: dns.TypeA,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.A("172-17-0-222.new-svc.test-1.svc.cluster.local.      5    IN      A       172.17.0.222"),
+		},
+	},
+}
+
+var newObjects = `apiVersion: v1
+kind: Service
+metadata:
+  name: new-svc
+  namespace: test-1
+spec:
+  clusterIP: 10.96.0.222
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: new-svc
+  namespace: test-1
+subsets:
+  - addresses:
+      - ip: 172.17.0.222
+    ports:
+      - port: 80
+        name: http
+        protocol: TCP
+`
+
 func TestKubernetesA(t *testing.T) {
 
 	rmFunc, upstream, udp := UpstreamServer(t, "example.net", ExampleNet)
@@ -128,5 +173,35 @@ func TestKubernetesA(t *testing.T) {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}
 		})
+	}
+
+	newObjectsFile, rmFunc, err := intTest.TempFile(os.TempDir(), newObjects)
+	defer rmFunc()
+	if err != nil {
+		t.Fatalf("could not create file to add service/endpoint: %s", err)
+	}
+
+	_, err = Kubectl("apply -f " + newObjectsFile)
+	if err != nil {
+		t.Fatalf("could not add service/endpoint via kubectl: %s", err)
+	}
+
+	for _, tc := range newObjectTests {
+		t.Run("New Object "+tc.Qname, func(t *testing.T) {
+			res, err := DoIntegrationTest(tc, namespace)
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			test.CNAMEOrder(t, res)
+			test.SortAndCheck(t, res, tc)
+			if t.Failed() {
+				t.Errorf("coredns log: %s", CorednsLogs())
+			}
+		})
+	}
+
+	_, err = Kubectl("-n test-1 delete service new-svc")
+	if err != nil {
+		t.Fatalf("could not add service/endpoint via kubectl: %s", err)
 	}
 }
