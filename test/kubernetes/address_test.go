@@ -104,7 +104,7 @@ var newObjectTests = []test.Case{
 		Qname: "172-17-0-222.new-svc.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.A("172-17-0-222.new-svc.test-1.svc.cluster.local.      5    IN      A       10.96.0.222"),
+			test.A("172-17-0-222.new-svc.test-1.svc.cluster.local.      5    IN      A       172.17.0.222"),
 		},
 	},
 }
