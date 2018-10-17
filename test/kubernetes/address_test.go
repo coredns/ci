@@ -176,6 +176,7 @@ func TestKubernetesA(t *testing.T) {
 	}
 
 	newObjectsFile, rmFunc, err := intTest.TempFile(os.TempDir(), newObjects)
+	defer rmFunc()
 	if err != nil {
 		t.Fatalf("could not create file to add service/endpoint: %s", err)
 	}
