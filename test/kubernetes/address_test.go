@@ -180,13 +180,13 @@ func TestKubernetesA(t *testing.T) {
 		t.Fatalf("could not create file to add service/endpoint: %s", err)
 	}
 
-	_, err = Kubectl("-n apply -f " + newObjectsFile)
+	_, err = Kubectl("apply -f " + newObjectsFile)
 	if err != nil {
 		t.Fatalf("could not add service/endpoint via kubectl: %s", err)
 	}
 
-	t.Run("New Objects", func(t *testing.T) {
-		for _, tc := range newObjectTests {
+	for _, tc := range newObjectTests {
+		t.Run("New Object "+tc.Qname, func(t *testing.T) {
 			res, err := DoIntegrationTest(tc, namespace)
 			if err != nil {
 				t.Errorf(err.Error())
@@ -196,7 +196,7 @@ func TestKubernetesA(t *testing.T) {
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}
-		}
-	})
+		})
+	}
 
 }
