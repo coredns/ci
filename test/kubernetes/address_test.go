@@ -200,7 +200,7 @@ func TestKubernetesA(t *testing.T) {
 		})
 	}
 
-	_, err = Kubectl("-n test-1 delete service new-service")
+	_, err = Kubectl("-n test-1 delete service new-svc")
 	if err != nil {
 		t.Fatalf("could not add service/endpoint via kubectl: %s", err)
 	}
