@@ -91,6 +91,7 @@ spec:
           name: dns-tcp
           protocol: TCP
       dnsPolicy: Default
+      restartPolicy: Never
       volumes:
         - name: config-volume
           configMap:
