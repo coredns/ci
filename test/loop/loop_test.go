@@ -24,15 +24,15 @@ func TestLoopDetected(t *testing.T) {
 	}
 }
 
-func TestLoopBadUpstream(t *testing.T) {
+func TestLoopBlackHoleUpstream(t *testing.T) {
 
-	// 10.0.0.1:9999 is an invalid upstream server
+	// 240.0.0.0 is a "reserved for future use" range that routers apparently drop.
 	corefile := `    .:53 {
         errors
         log
         loop
         kubernetes cluster.local
-        proxy . 10.96.0.1:9999
+        proxy . 240.0.0.0
     }
 `
 
