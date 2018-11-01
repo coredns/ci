@@ -13,7 +13,6 @@ func TestLoopDetected(t *testing.T) {
         errors
         log
         loop
-        kubernetes cluster.local
         proxy . 127.0.0.1
     }
 `
@@ -31,7 +30,6 @@ func TestLoopBlackHoleUpstream(t *testing.T) {
         errors
         log
         loop
-        kubernetes cluster.local
         proxy . 240.0.0.0
     }
 `
