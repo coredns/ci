@@ -1,4 +1,4 @@
-test-coredns: fetch-coredns-pr build-docker start-k8s test-k8s
+test-coredns: fetch-coredns-pr build-docker start-k8s test-plugins
 
 test-deployment: fetch-deployment-pr fetch-coredns start-k8s test-k8s-deployment
 
@@ -70,10 +70,10 @@ start-k8s:
 	# Set up minikube
 	-sh ./build/kubernetes/minikube_setup.sh
 
-.PHONY: test-k8s
-test-k8s:
+.PHONY: test-plugins
+test-plugins:
 	# Integration tests
-	go test -v ./test/kubernetes/...
+	go test -v ./test/internalplugins/...
 
 .PHONY: test-k8s-deployment
 test-k8s-deployment:

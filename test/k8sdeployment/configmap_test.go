@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/coredns/ci/test/kubernetes"
+	"github.com/coredns/ci/test/internalplugins/kubernetes"
 	"strings"
 )
 
