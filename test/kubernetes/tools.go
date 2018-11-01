@@ -223,6 +223,9 @@ func WaitNReady(maxWait, n int) error {
 	running := 0
 	for {
 		o, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns")
+		if strings.Contains(o, "Error") || strings.Contains(o, "CrashLoopBackOff") {
+			return errors.New("coredns pod failed. coredns log: " + CorednsLogs())
+		}
 		if strings.Count(o, "Running") == n {
 			running += 1
 		}
