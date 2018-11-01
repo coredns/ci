@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coredns/ci/test/internalplugins/kubernetes"
+	"github.com/coredns/ci/test/kubernetes"
 	metrics "github.com/coredns/coredns/plugin/metrics/test"
 	"github.com/coredns/coredns/plugin/test"
 	"github.com/miekg/dns"

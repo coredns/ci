@@ -73,7 +73,7 @@ start-k8s:
 .PHONY: test-plugins
 test-plugins:
 	# Integration tests
-	go test -v ./test/internalplugins/...
+	go test -v ./test/kubernetes/...
 
 .PHONY: test-k8s-deployment
 test-k8s-deployment:

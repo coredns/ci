@@ -3,7 +3,7 @@ package loop
 import (
 	"testing"
 
-	"github.com/coredns/ci/test/internalplugins/kubernetes"
+	"github.com/coredns/ci/test/kubernetes"
 	"strings"
 )
 
