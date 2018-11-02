@@ -222,13 +222,9 @@ func WaitNReady(maxWait, n int) error {
 
 	running := 0
 	for {
-		logs := CorednsLogs()
-		if maxWait == 0 {
-			return errors.New("timeout waiting for coredns to be ready. coredns log: " + logs)
-		}
 		o, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns")
-		if strings.Contains(o, "Error") {
-			return errors.New("coredns pod failed. coredns log: " + logs)
+		if strings.Contains(o, "Error") || strings.Contains(o, "CrashLoopBackOff") {
+			return errors.New("coredns pod failed. coredns log: " + CorednsLogs())
 		}
 		if strings.Count(o, "Running") == n {
 			running += 1
@@ -239,6 +235,9 @@ func WaitNReady(maxWait, n int) error {
 		}
 		time.Sleep(time.Second)
 		maxWait = maxWait - 1
+		if maxWait == 0 {
+			return errors.New("timeout waiting for coredns to be ready. coredns log: " + CorednsLogs())
+		}
 	}
 	return nil
 }
@@ -246,8 +245,9 @@ func WaitNReady(maxWait, n int) error {
 // CorednsLogs returns the current coredns log
 func CorednsLogs() string {
 	name, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns | grep coredns | cut -f1 -d' ' | tr -d '\n'")
-	logs, _ := Kubectl("-n kube-system logs " + name)
-	return (logs)
+	previous, _ := Kubectl("-n kube-system logs -p " + name)
+	current, _ := Kubectl("-n kube-system logs " + name)
+	return (previous + "\n" + current)
 }
 
 // prepForConfigMap returns a config prepared for inclusion in a configmap definition
