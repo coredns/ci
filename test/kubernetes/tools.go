@@ -184,7 +184,7 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	if err != nil {
 		return err
 	}
-
+	time.Sleep(10*time.Second)
 	// force coredns pod reload the config
 	Kubectl("-n kube-system delete pods -l k8s-app=kube-dns")
 
