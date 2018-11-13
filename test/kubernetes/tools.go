@@ -188,7 +188,7 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	// force coredns pod reload the config
 	Kubectl("-n kube-system delete pods -l k8s-app=kube-dns")
 
-	return WaitReady(30)
+	return WaitReady(90)
 }
 
 func LoadKubednsConfigmap(feddata, stubdata, upstreamdata string) error {
