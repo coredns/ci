@@ -166,7 +166,7 @@ func LoadCorefile(corefile string) error {
 	return LoadCorefileAndZonefile(corefile, "")
 }
 
-// LoadCorefileAndZonefile constructs and configmap defining files for the corefile and zone,
+// LoadCorefileAndZonefile constructs a configmap defining files for the corefile and zone,
 // forces the coredns pod to load the new configmap, and waits for the coredns pod to be ready.
 func LoadCorefileAndZonefile(corefile, zonefile string) error {
 
@@ -184,11 +184,11 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	if err != nil {
 		return err
 	}
-	time.Sleep(10*time.Second)
+
 	// force coredns pod reload the config
 	Kubectl("-n kube-system delete pods -l k8s-app=kube-dns")
 
-	return WaitReady(90)
+	return WaitReady(30)
 }
 
 func LoadKubednsConfigmap(feddata, stubdata, upstreamdata string) error {
