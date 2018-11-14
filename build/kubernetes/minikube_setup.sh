@@ -16,7 +16,7 @@ touch $HOME/.kube/config
 
 export KUBECONFIG=$HOME/.kube/config
 
-minikube start --vm-driver=none --kubernetes-version=v1.10.0
+minikube start --vm-driver=none --kubernetes-version=v1.12.0
 
 # Wait for minkube's api service to be ready
 for i in {1..60} # timeout for 2 minutes
@@ -28,9 +28,11 @@ do
   sleep 2
 done
 
-# Disable kube-dns in addon manager
-minikube addons disable kube-dns 2> /dev/null
-kubectl delete deployment kube-dns -n kube-system
+# Disable add-on manager
+minikube addons disable addon-manager
+
+#delete default coredns and deployment
+kubectl delete deployment coredns -n kube-system
 
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
@@ -39,7 +41,7 @@ kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
 kubectl label nodes minikube failure-domain.beta.kubernetes.io/zone=fdzone
 kubectl label nodes minikube failure-domain.beta.kubernetes.io/region=fdregion
 
-# Deploy coredns in place of kube-dns
+# Deploy default test coredns
 kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 
 # Start local proxy (for out-of-cluster tests)

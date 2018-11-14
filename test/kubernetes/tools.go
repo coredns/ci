@@ -166,7 +166,7 @@ func LoadCorefile(corefile string) error {
 	return LoadCorefileAndZonefile(corefile, "")
 }
 
-// LoadCorefileAndZonefile constructs and configmap defining files for the corefile and zone,
+// LoadCorefileAndZonefile constructs a configmap defining files for the corefile and zone,
 // forces the coredns pod to load the new configmap, and waits for the coredns pod to be ready.
 func LoadCorefileAndZonefile(corefile, zonefile string) error {
 
@@ -243,7 +243,7 @@ func WaitNReady(maxWait, n int) error {
 
 // CorednsLogs returns the current coredns log
 func CorednsLogs() string {
-	name, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns | grep Running | cut -f1 -d' ' | tr -d '\n'")
+	name, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns | grep coredns | cut -f1 -d' ' | tr -d '\n'")
 	logs, _ := Kubectl("-n kube-system logs " + name)
 	return (logs)
 }
