@@ -72,17 +72,17 @@ start-k8s:
 
 .PHONY: test-k8s
 test-k8s:
-	# Integration tests
+	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/kubernetes>https://github.com/coredns/ci/tree/master/test/kubernetes</a>)
 	go test -v ./test/kubernetes/...
 
 .PHONY: test-k8s-deployment
 test-k8s-deployment:
-	# Integration tests
+	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/k8sdeployment>https://github.com/coredns/ci/tree/master/test/k8sdeployment</a>)
 	go test -v ./test/k8sdeployment/...
 
 .PHONY: go-test-kubernetai
 go-test-kubernetai:
-	# Integration tests
+	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/kubernetai>https://github.com/coredns/ci/tree/master/test/kubernetai</a>)
 	go test -v ./test/kubernetai/...
 
 .PHONY: clean-k8s
