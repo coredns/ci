@@ -46,7 +46,7 @@ var dnsTestCasesA = []test.Case{
 		Qname: "bogusservice.test-1.my.zone.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeNameError,
 		Ns: []dns.RR{
-			test.SOA("cluster.local.	303	IN	SOA	ns.dns.my.zone. hostmaster.my.zone. 1502313310 7200 1800 86400 60"),
+			test.SOA("my.zone.	303	IN	SOA	ns.dns.my.zone. hostmaster.my.zone. 1502313310 7200 1800 86400 60"),
 		},
 	},
 	{ // An A record query for a non-existing endpoint should return NXDOMAIN
@@ -109,20 +109,20 @@ var dnsTestCasesA = []test.Case{
 		Qname: "cluster.local.", Qtype: dns.TypeNS,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.NS("cluster.local.      5    IN      NS      ns.dns.cluster.local."),
+			test.NS("cluster.local.      303    IN      NS      ns.dns.cluster.local."),
 		},
 		Extra: []dns.RR{
-			test.A("ns.dns.cluster.local.	5	IN	A	10.96.0.10"),
+			test.A("ns.dns.cluster.local.	303	IN	A	10.96.0.10"),
 		},
 	},
 	{ // external zone ns record
 		Qname: "my.zone.", Qtype: dns.TypeNS,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.NS("my.zone.      5    IN      NS      ns.dns.my.zone."),
+			test.NS("my.zone.      303    IN      NS      ns.dns.my.zone."),
 		},
 		Extra: []dns.RR{
-			test.A("ns.dns.my.zone.	5	IN	A	1.1.1.10"),
+			test.A("ns.dns.my.zone.	303	IN	A	1.1.1.10"),
 		},
 	},
 }
