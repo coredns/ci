@@ -12,11 +12,19 @@ import (
 )
 
 var dnsTestCasesA = []test.Case{
+
 	{ // An A record query for an existing service should return a record
 		Qname: "svc-1-a.test-1.svc.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
 			test.A("svc-1-a.test-1.svc.cluster.local.      5    IN      A       10.96.0.100"),
+		},
+	},
+	{ // An A record query for an existing service in the external zone should return a record
+		Qname: "svc-1-a.test-1.my.zone.", Qtype: dns.TypeA,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.A("svc-1-a.test-1.my.zone.      5    IN      A       1.2.3.4"),
 		},
 	},
 	{ // An A record query for an existing headless service should return a record for each of its ipv4 endpoints
@@ -32,6 +40,13 @@ var dnsTestCasesA = []test.Case{
 		Rcode: dns.RcodeNameError,
 		Ns: []dns.RR{
 			test.SOA("cluster.local.	303	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1502313310 7200 1800 86400 60"),
+		},
+	},
+	{ // An A record query for a non-existing service in external zone should return NXDOMAIN
+		Qname: "bogusservice.test-1.my.zone.", Qtype: dns.TypeA,
+		Rcode: dns.RcodeNameError,
+		Ns: []dns.RR{
+			test.SOA("cluster.local.	303	IN	SOA	ns.dns.my.zone. hostmaster.my.zone. 1502313310 7200 1800 86400 60"),
 		},
 	},
 	{ // An A record query for a non-existing endpoint should return NXDOMAIN
@@ -90,6 +105,26 @@ var dnsTestCasesA = []test.Case{
 			test.AAAA("headless-svc.test-1.svc.cluster.local.      5    IN      AAAA      1234:abcd::2"),
 		},
 	},
+	{ // local cluster zone ns record
+		Qname: "cluster.local.", Qtype: dns.TypeNS,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.NS("cluster.local.      5    IN      NS      ns.dns.cluster.local."),
+		},
+		Extra: []dns.RR{
+			test.A("ns.dns.cluster.local.	5	IN	A	10.96.0.10"),
+		},
+	},
+	{ // external zone ns record
+		Qname: "my.zone.", Qtype: dns.TypeNS,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.NS("my.zone.      5    IN      NS      ns.dns.my.zone."),
+		},
+		Extra: []dns.RR{
+			test.A("ns.dns.my.zone.	5	IN	A	1.1.1.10"),
+		},
+	},
 }
 
 var newObjectTests = []test.Case{
@@ -144,7 +179,8 @@ func TestKubernetesA(t *testing.T) {
 	corefile := `    .:53 {
         errors
         log
-        kubernetes cluster.local 10.in-addr.arpa {
+        kubernetes cluster.local my.zone 10.in-addr.arpa {
+            external my.zone
             namespaces test-1
             upstream ` + udp + `
         }
