@@ -26,6 +26,22 @@ var autopathTests = []test.Case{
 			test.CNAME("svc-1-a.test-1.test-1.svc.cluster.local.  303    IN	     CNAME	  svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
+	{ // Valid service name + namespace on "another zone" -> success on 2nd search in path -> CNAME glue + A record
+		Qname: "svc-d.test-2", Qtype: dns.TypeA,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.A("svc-d.test-2.svc.fluster.local.      303    IN      A       10.96.0.121"),
+			test.CNAME("svc-d.test-2.test-1.svc.cluster.local.  303    IN	     CNAME	  svc-d.test-2.svc.fluster.local."),
+		},
+	},
+	{ // Valid fqdn for internal service -> success on empty search -> CNAME glue + A record
+		Qname: "svc-d.test-2.svc.fluster.local", Qtype: dns.TypeA,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.A("svc-d.test-2.svc.fluster.local.      303    IN      A       10.96.0.121"),
+			test.CNAME("svc-d.test-2.svc.fluster.local.test-1.svc.cluster.local.  303    IN	     CNAME	  svc-d.test-2.svc.fluster.local."),
+		},
+	},
 	{ // Valid service name + namespace + svc -> success on 3nd search in path -> CNAME glue + A record
 		Qname: "svc-1-a.test-1.svc", Qtype: dns.TypeA,
 		Rcode: dns.RcodeSuccess,
@@ -73,17 +89,19 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 
 	corefile :=
 		`    .:53 {
-      errors
-      log
-      autopath @kubernetai
-      kubernetai fluster.local {
-        pods verified
-      }
-      kubernetai cluster.local {
-        pods verified
-      }
-      file /etc/coredns/Zonefile example.net
-      proxy internal ` + udp + `
+        errors
+        log
+        debug
+        autopath @kubernetai
+        kubernetai fluster.local {
+            pods verified
+        }
+        kubernetai cluster.local {
+            namespaces test-1
+            pods verified
+        }
+        file /etc/coredns/Zonefile example.net
+        proxy internal ` + udp + `
     }
 `
 	exampleZonefile := `    ; example.net zone info for autopath tests
