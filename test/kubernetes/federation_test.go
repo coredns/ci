@@ -12,11 +12,11 @@ import (
 func TestFederation(t *testing.T) {
 	var testCases = []test.Case{
 		{ // A query of a federated service should return a CNAME and A record
-			Qname: "fedsvc.default.testfed.svc.cluster.local.", Qtype: dns.TypeA,
+			Qname: "fedsvc.default.testfed.fsvc.cluster.local.", Qtype: dns.TypeA,
 			Rcode: dns.RcodeSuccess,
 			Answer: []dns.RR{
-				test.CNAME("fedsvc.default.testfed.svc.cluster.local. 303  IN  CNAME  fedsvc.default.testfed.svc.fdzone.fdregion.example.com."),
-				test.A("fedsvc.default.testfed.svc.fdzone.fdregion.example.com. 303 IN A 1.2.3.4"),
+				test.CNAME("fedsvc.default.testfed.fsvc.cluster.local. 303  IN  CNAME  fedsvc.default.testfed.fsvc.fdzone.fdregion.example.com."),
+				test.A("fedsvc.default.testfed.fsvc.fdzone.fdregion.example.com. 303 IN A 1.2.3.4"),
 			},
 		},
 	}
@@ -29,7 +29,7 @@ func TestFederation(t *testing.T) {
           testfed example.com
         }
         template ANY ANY example.com {
-          answer "fedsvc.default.testfed.svc.fdzone.fdregion.example.com. 5 IN A 1.2.3.4"
+          answer "fedsvc.default.testfed.fsvc.fdzone.fdregion.example.com. 5 IN A 1.2.3.4"
         }
     }
 `
