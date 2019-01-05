@@ -65,8 +65,9 @@ func TestUpstreamToOther(t *testing.T) {
         errors
         log
         kubernetes cluster.local {
-            upstream ` + udp + `
+            upstream
         }
+	forward . ` + udp + `
     }
 `
 
