@@ -21,14 +21,14 @@ var upstreamCases = []test.Case{
 }
 
 func TestUpstreamToSelf(t *testing.T) {
-	corefile := `    .:53 {
-        errors
-        log
-        kubernetes cluster.local {
-            upstream
-        }
-        file /etc/coredns/Zonefile example.net
-    }
+	corefile := `.:53 {
+	errors
+	log
+	kubernetes cluster.local {
+		    upstream
+	}
+	file /etc/coredns/Zonefile example.net
+}
 `
 
 	err := LoadCorefileAndZonefile(corefile, ExampleNet)
@@ -61,14 +61,14 @@ func TestUpstreamToOther(t *testing.T) {
 	defer upstream.Stop()
 	defer rmFunc()
 
-	corefile := `    .:53 {
+	corefile := `.:53 {
         errors
         log
         kubernetes cluster.local {
             upstream
         }
 	forward . ` + udp + `
-    }
+}
 `
 
 	err := LoadCorefile(corefile)

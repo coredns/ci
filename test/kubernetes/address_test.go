@@ -7,8 +7,9 @@ import (
 	"github.com/coredns/coredns/plugin/test"
 	intTest "github.com/coredns/coredns/test"
 
-	"github.com/miekg/dns"
 	"os"
+
+	"github.com/miekg/dns"
 )
 
 var dnsTestCasesA = []test.Case{
@@ -58,7 +59,7 @@ var dnsTestCasesA = []test.Case{
 			test.A("*.test-1.svc.cluster.local.      303    IN      A       172.17.0.254"),
 			test.A("*.test-1.svc.cluster.local.      303    IN      A       172.17.0.255"),
 			test.CNAME("*.test-1.svc.cluster.local.  303    IN      CNAME   example.net."),
-			test.A("example.net.                     303    IN      A       13.14.15.16"),
+			// test.A("example.net.                     303    IN      A       13.14.15.16"), // Not resolved because no proxy is defined.
 		},
 	},
 	{ // A wild card service name in an un-exposed namespace result in nxdomain

@@ -66,6 +66,7 @@ func TestKubernetesFallthrough(t *testing.T) {
           upstream ` + udp + `
           fallthrough
       }
+      forward . ` + udp + `
     }
 `
 	err := LoadCorefileAndZonefile(corefile, clusterLocal)
