@@ -56,7 +56,7 @@ func TestKubernetesAPIFallthrough(t *testing.T) {
 	corefile :=
 		`.:0 {
     kubernetes cluster.local {
-        endpoint nonexistance:8080 invalidip:8080 localhost:8080
+	    endpoint localhost:8080 nonexistance:8080 invalidip:8080
     }`
 
 	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
@@ -80,17 +80,13 @@ func TestKubernetesAPIFallthrough(t *testing.T) {
 		test.SortAndCheck(t, res, tc)
 	}
 }
-func TestKubernetesSecureAPIFallthrough(t *testing.T) {
-	t.Skip("Skipped coredns/coredns#1464")
-}
 
-/*
 func TestKubernetesSecureAPIFallthrough(t *testing.T) {
 
 	corefile :=
 		`.:0 {
     kubernetes cluster.local {
-        endpoint https://nonexistance:8443 https://invalidip:8443 https://minikubeCA:8443
+        endpoint https://minikubeCA:8443 https://nonexistance:8443 https://invalidip:8443
         tls /root/.minikube/client.crt /root/.minikube/client.key /root/.minikube/ca.crt 
     }`
 
@@ -115,4 +111,3 @@ func TestKubernetesSecureAPIFallthrough(t *testing.T) {
 		test.SortAndCheck(t, res, tc)
 	}
 }
-*/
