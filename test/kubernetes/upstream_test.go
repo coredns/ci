@@ -47,8 +47,10 @@ func TestUpstreamToSelf(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
+			test.CNAMEOrder(res)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}
@@ -87,8 +89,10 @@ func TestUpstreamToOther(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
+			test.CNAMEOrder(res)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}
@@ -137,7 +141,9 @@ func TestUpstreamLoopBreak(t *testing.T) {
 			}
 			// Dedup any duplicates that the template plugin may create
 			res.Answer = dns.Dedup(res.Answer, nil)
-			test.SortAndCheck(t, res, tc)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}

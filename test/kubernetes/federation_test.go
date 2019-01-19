@@ -51,7 +51,7 @@ func TestFederation(t *testing.T) {
 			}
 			// Dedup any duplicates that the template plugin may create
 			res.Answer = dns.Dedup(res.Answer, nil)
-			test.SortAndCheck(t, res, tc)
+			test.SortAndCheck(res, tc)
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}

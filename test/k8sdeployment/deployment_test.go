@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/coredns/ci/test/kubernetes"
-	metrics "github.com/coredns/coredns/plugin/metrics/test"
 	"github.com/coredns/coredns/plugin/test"
+
 	"github.com/miekg/dns"
 )
 
@@ -128,7 +128,7 @@ func TestKubernetesDeployment(t *testing.T) {
 			t.Errorf("Expected 2 pods, found: %v", len(ips))
 		}
 		for _, ip := range ips {
-			mf := metrics.Scrape(t, "http://"+ip+":9153/metrics")
+			mf := test.Scrape("http://" + ip + ":9153/metrics")
 			if len(mf) == 0 {
 				t.Errorf("unable to scrape metrics from %v", ip)
 			}
@@ -148,8 +148,10 @@ func TestKubernetesDeployment(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
+			test.CNAMEOrder(res)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", kubernetes.CorednsLogs())
 			}
@@ -161,9 +163,9 @@ func TestKubernetesDeployment(t *testing.T) {
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
 			res, err := kubernetes.DoIntegrationTest(tc, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Error(err)
 			}
-			test.CNAMEOrder(t, res)
+			test.CNAMEOrder(res)
 			// Just compare the cardinality of the response to expected
 			if len(tc.Answer) != len(res.Answer) {
 				t.Errorf("Expected %v answers, got %v. coredns log: %s", len(tc.Answer), len(res.Answer), kubernetes.CorednsLogs())

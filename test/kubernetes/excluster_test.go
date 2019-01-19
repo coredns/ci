@@ -47,7 +47,9 @@ func TestKubernetesSecureAPI(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Could not send query: %s", err)
 		}
-		test.SortAndCheck(t, res, tc)
+		if err := test.SortAndCheck(res, tc); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -77,7 +79,9 @@ func TestKubernetesAPIFallthrough(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Could not send query: %s", err)
 		}
-		test.SortAndCheck(t, res, tc)
+		if err := test.SortAndCheck(res, tc); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -108,6 +112,8 @@ func TestKubernetesSecureAPIFallthrough(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Could not send query: %s", err)
 		}
-		test.SortAndCheck(t, res, tc)
+		if test.SortAndCheck(res, tc); err != nil {
+			t.Error(err)
+		}
 	}
 }

@@ -53,8 +53,10 @@ func TestKubernetesPodsInsecure(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
+			test.CNAMEOrder(res)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}
@@ -106,8 +108,10 @@ func TestKubernetesPodsVerified(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
+			test.CNAMEOrder(res)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}
