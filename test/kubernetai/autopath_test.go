@@ -135,8 +135,10 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 			if res == nil {
 				t.Fatal("unexpected nil response")
 			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
+			test.CNAMEOrder(res)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", kubernetes.CorednsLogs())
 			}

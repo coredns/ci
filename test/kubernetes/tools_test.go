@@ -90,8 +90,8 @@ svc-2-a.test-1.svc.cluster.local.		5	IN	A	10.96.0.101
 		t.Fatalf("failed test: got %v results, expected 2", len(ms))
 	}
 
-	test.SortAndCheck(t, ms[0], tcs[0])
-	test.SortAndCheck(t, ms[1], tcs[1])
+	test.SortAndCheck(ms[0], tcs[0])
+	test.SortAndCheck(ms[1], tcs[1])
 
 }
 
@@ -132,6 +132,7 @@ svc-1-a.test-1.svc.cluster.local. 5 IN	A	10.96.0.100
 	if err != nil {
 		t.Fatalf("failed test: %s", err)
 	}
-
-	test.SortAndCheck(t, ms[0], tcs[0])
+	if err := test.SortAndCheck(ms[0], tcs[0]); err != nil {
+		t.Error(err)
+	}
 }

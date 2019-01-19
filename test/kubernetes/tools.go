@@ -15,9 +15,10 @@ import (
 
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/mholt/caddy"
 	"github.com/miekg/dns"
-	"time"
 
 	// Load all managed plugins in github.com/coredns/coredns
 	_ "github.com/coredns/coredns/core/plugin"
@@ -69,11 +70,13 @@ func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			test.CNAMEOrder(t, res)
+			test.CNAMEOrder(res)
 			sort.Sort(test.RRSet(tc.Answer))
 			sort.Sort(test.RRSet(tc.Ns))
 			sort.Sort(test.RRSet(tc.Extra))
-			test.SortAndCheck(t, res, tc)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}

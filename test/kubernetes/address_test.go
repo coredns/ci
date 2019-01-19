@@ -2,12 +2,10 @@ package kubernetes
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/coredns/coredns/plugin/test"
-	intTest "github.com/coredns/coredns/test"
-
-	"os"
 
 	"github.com/miekg/dns"
 )
@@ -168,15 +166,17 @@ func TestKubernetesA(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
+			test.CNAMEOrder(res)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}
 		})
 	}
 
-	newObjectsFile, rmFunc, err := intTest.TempFile(os.TempDir(), newObjects)
+	newObjectsFile, rmFunc, err := test.TempFile(os.TempDir(), newObjects)
 	defer rmFunc()
 	if err != nil {
 		t.Fatalf("could not create file to add service/endpoint: %s", err)
@@ -193,8 +193,10 @@ func TestKubernetesA(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
-			test.CNAMEOrder(t, res)
-			test.SortAndCheck(t, res, tc)
+			test.CNAMEOrder(res)
+			if err := test.SortAndCheck(res, tc); err != nil {
+				t.Error(err)
+			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", CorednsLogs())
 			}
