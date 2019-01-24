@@ -10,8 +10,7 @@ import (
 )
 
 func TestConfigMapTranslation(t *testing.T) {
-	//feddata := `{"foo" : "foo.fed.com", "bar.com" : "bar.fed.com"}`
-	feddata := ""
+	feddata := `{"foo" : "foo.fed.com", "bar.com" : "bar.fed.com"}`
 	stubdata := `{"abc.com" : ["1.2.3.4:5300","4.4.4.4"], "my.cluster.local" : ["2.3.4.5:5300"]}`
 	upstreamdata := `["8.8.8.8", "8.8.4.4"]`
 
@@ -30,20 +29,24 @@ func TestConfigMapTranslation(t *testing.T) {
     prometheus :9153
     proxy . 8.8.8.8 8.8.4.4
     cache 30
+    loop
     reload
     loadbalance
 }
 abc.com:53 {
   errors
   cache 30
+  loop
   proxy . 1.2.3.4:5300
 }
 
 my.cluster.local:53 {
   errors
   cache 30
+  loop
   proxy . 2.3.4.5:5300
-}`
+}
+`
 
 	err := kubernetes.LoadKubednsConfigmap(feddata, stubdata, upstreamdata)
 	if err != nil {
@@ -64,7 +67,7 @@ my.cluster.local:53 {
 		t.Fatalf("error fetching translated corefile: %s", err)
 	}
 
-	if strings.Compare(corefileTranslated, corefileExpected) == 0 {
+	if strings.Compare(corefileTranslated, corefileExpected) != 0 {
 		t.Fatalf("failed test: Translation does not match")
 	}
 }
