@@ -27,7 +27,7 @@ func TestConfigMapTranslation(t *testing.T) {
       bar.com bar.fed.com
     }
     prometheus :9153
-    proxy . 8.8.8.8 8.8.4.4
+    forward . 8.8.8.8 8.8.4.4
     cache 30
     loop
     reload
@@ -37,14 +37,14 @@ abc.com:53 {
   errors
   cache 30
   loop
-  proxy . 1.2.3.4:5300
+  forward . 1.2.3.4:5300
 }
 
 my.cluster.local:53 {
   errors
   cache 30
   loop
-  proxy . 2.3.4.5:5300
+  forward . 2.3.4.5:5300
 }
 `
 
