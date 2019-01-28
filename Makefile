@@ -19,7 +19,7 @@ fetch-coredns:
 	cd ${GOPATH}/src/${COREDNSPATH} && \
 	  git clone https://${COREDNSREPO}/coredns.git && \
 	  cd coredns && \
-	  ${MAKE} godeps
+	  ${MAKE}
 
 .PHONY: fetch-deployment-pr
 fetch-deployment-pr:
