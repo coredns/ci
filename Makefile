@@ -73,7 +73,7 @@ start-k8s:
 .PHONY: test-k8s
 test-k8s:
 	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/kubernetes>https://github.com/coredns/ci/tree/master/test/kubernetes</a>)
-	go test -v ./test/kubernetes/...
+	GO111MODULE=on go test -v ./test/kubernetes/...
 
 .PHONY: test-k8s-deployment
 test-k8s-deployment:
