@@ -131,7 +131,7 @@ func WaitForClientPodRecord(namespace string) error {
 
 // UpstreamServer starts a local instance of coredns with the given zone file
 func UpstreamServer(t *testing.T, zone, zoneFile string) (func(), *caddy.Instance, string) {
-	upfile, rmFunc, err := intTest.TempFile(os.TempDir(), zoneFile)
+	upfile, rmFunc, err := test.TempFile(os.TempDir(), zoneFile)
 	if err != nil {
 		t.Fatalf("could not create file for CNAME upstream lookups: %s", err)
 	}
@@ -178,7 +178,7 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	yamlString += "  Corefile: |\n" + prepForConfigMap(corefile)
 	yamlString += "  Zonefile: |\n" + prepForConfigMap(zonefile)
 
-	file, rmFunc, err := intTest.TempFile(os.TempDir(), yamlString)
+	file, rmFunc, err := test.TempFile(os.TempDir(), yamlString)
 	if err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func LoadKubednsConfigmap(feddata, stubdata, upstreamdata string) error {
 	yamlString += "  federations: |\n" + prepForConfigMap(feddata)
 	yamlString += "  stubDomains: |\n" + prepForConfigMap(stubdata)
 
-	file, rmFunc, err := intTest.TempFile(os.TempDir(), yamlString)
+	file, rmFunc, err := test.TempFile(os.TempDir(), yamlString)
 	if err != nil {
 		return err
 	}
