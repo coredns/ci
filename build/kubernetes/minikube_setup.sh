@@ -31,8 +31,11 @@ done
 # Scale the CoreDNS replicas to 1 for more accuracy.
 kubectl scale -n kube-system deployment/coredns --replicas=1
 
-# Patch CoreDNS to update deployment and Configmap.
+# Patch CoreDNS to update deployment.
 kubectl patch deployment coredns -n kube-system -p "$(cat ${ci_bin}/kubernetes/coredns_deployment_patch.yaml)"
+
+# Deploy a test DNS called coredns-test
+kubectl apply -f ${ci_bin}/kubernetes/coredns-test.yaml
 
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml

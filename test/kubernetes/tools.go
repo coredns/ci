@@ -194,6 +194,28 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	return WaitReady(30)
 }
 
+func LoadCoreDNSTestCorefile(corefile, k8sapp string) error {
+
+	// apply configmap yaml
+	yamlString := coreDNSTestConfigmap + "\n"
+	yamlString += "  Corefile: |\n" + prepForConfigMap(corefile)
+
+	file, rmFunc, err := test.TempFile(os.TempDir(), yamlString)
+	if err != nil {
+		return err
+	}
+	defer rmFunc()
+	_, err = Kubectl("apply -f " + file)
+	if err != nil {
+		return err
+	}
+
+	// force coredns pod reload the config
+	Kubectl("-n kube-system delete pods -l k8s-app=" + k8sapp)
+
+	return WaitReady(30)
+}
+
 func LoadKubednsConfigmap(feddata, stubdata, upstreamdata string) error {
 
 	//apply configmap yaml
@@ -248,7 +270,14 @@ func WaitNReady(maxWait, n int) error {
 func CorednsLogs() string {
 	name, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns | grep coredns | cut -f1 -d' ' | tr -d '\n'")
 	logs, _ := Kubectl("-n kube-system logs " + name)
-	return (logs)
+	return logs
+}
+
+// CorednsTestLogs returns the current log of the test coredns server
+func CorednsTestLogs(k8sapp string) string {
+	name, _ := Kubectl("-n kube-system get pods -l k8s-app=" + k8sapp + " | grep coredns | cut -f1 -d' ' | tr -d '\n'")
+	logs, _ := Kubectl("-n kube-system logs " + name)
+	return logs
 }
 
 // prepForConfigMap returns a config prepared for inclusion in a configmap definition
@@ -265,8 +294,8 @@ func prepForConfigMap(config string) string {
 }
 
 // CoreDNSPodIPs return the ips of all coredns pods
-func CoreDNSPodIPs() ([]string, error) {
-	lines, err := Kubectl("-n kube-system get pods -l k8s-app=kube-dns -o wide | awk '{print $6}' | tail -n+2")
+func CoreDNSPodIPs(k8sapp string) ([]string, error) {
+	lines, err := Kubectl("-n kube-system get pods -l k8s-app=" + k8sapp + " -o wide | awk '{print $6}' | tail -n+2")
 	if err != nil {
 		return nil, err
 	}
@@ -438,6 +467,13 @@ const (
 kind: ConfigMap
 metadata:
   name: coredns
+  namespace: kube-system
+data:`
+
+	coreDNSTestConfigmap = `apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-test
   namespace: kube-system
 data:`
 
