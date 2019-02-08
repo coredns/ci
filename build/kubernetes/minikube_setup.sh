@@ -16,9 +16,9 @@ touch $HOME/.kube/config
 
 export KUBECONFIG=$HOME/.kube/config
 
-minikube start --vm-driver=none --kubernetes-version=v1.12.0
+minikube start --vm-driver=none --kubernetes-version=v1.13.3
 
-# Wait for minkube's api service to be ready
+# Wait for Minikube's api service to be ready
 for i in {1..60} # timeout for 2 minutes
 do
    kubectl get po
@@ -27,9 +27,6 @@ do
   fi
   sleep 2
 done
-
-# Disable add-on manager
-minikube addons disable addon-manager
 
 #delete default coredns and deployment
 kubectl delete deployment coredns -n kube-system
