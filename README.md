@@ -34,5 +34,5 @@ At a high level, you should be able to do something like the following:
 2. make sure kubeconfig is set up to point to minikube, and that kubectl works
 3. create the required fixtures using `kubectl apply -f $GOPATH/src/github.com/coredns/ci/build/dns-test.yaml`. This creates a static set of test services/pods/namespaces (namespaces named test-1, test-2, etc).
 4. build the docker image of coredns. `cd $GOPATH/src/github.com/coredns/coredns && make coredns SYSTEM="GOOS=linux" && docker build -t coredns .`
-5. modify `$GOPATH/src/github.com/coredns/ci/build/coredns.yaml` image to point to the local coredns docker image.
+5. modify `$GOPATH/src/github.com/coredns/ci/build/coredns_deployment_patch.yaml` image to point to the local coredns docker image before patching the coredns deployment.
 6. run the tests with `go test` .... e.g. `go test -v ./test/kubernetes/...`
