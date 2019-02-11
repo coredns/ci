@@ -28,6 +28,9 @@ do
   sleep 2
 done
 
+# Scale the CoreDNS replicas to 1 for more accuracy.
+kubectl scale -n kube-system deployment/coredns --replicas=1
+
 # Patch CoreDNS to update deployment and Configmap.
 kubectl patch deployment coredns -n kube-system -p "$(cat ${ci_bin}/kubernetes/coredns_deployment_patch.yaml)"
 
