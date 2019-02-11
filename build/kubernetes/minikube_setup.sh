@@ -29,7 +29,7 @@ do
 done
 
 # Patch CoreDNS to update deployment and Configmap.
-kubectl patch deployment coredns -n kube-system -p $(cat ${ci_bin}/kubernetes/coredns_deployment_patch.yaml)
+kubectl patch deployment coredns -n kube-system -p "$(cat ${ci_bin}/kubernetes/coredns_deployment_patch.yaml)"
 
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
