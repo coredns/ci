@@ -28,8 +28,11 @@ do
   sleep 2
 done
 
-#delete default coredns and deployment
-kubectl delete deployment coredns -n kube-system
+# Scale the CoreDNS replicas to 1 for more accuracy.
+kubectl scale -n kube-system deployment/coredns --replicas=1
+
+# Patch CoreDNS to update deployment and Configmap.
+kubectl patch deployment coredns -n kube-system -p "$(cat ${ci_bin}/kubernetes/coredns_deployment_patch.yaml)"
 
 # Deploy test objects
 kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
@@ -38,8 +41,6 @@ kubectl create -f ${ci_bin}/kubernetes/dns-test.yaml
 kubectl label nodes minikube failure-domain.beta.kubernetes.io/zone=fdzone
 kubectl label nodes minikube failure-domain.beta.kubernetes.io/region=fdregion
 
-# Deploy default test coredns
-kubectl apply -f ${ci_bin}/kubernetes/coredns.yaml
 
 # Start local proxy (for out-of-cluster tests)
 kubectl proxy --port=8080 2> /dev/null &

@@ -1,0 +1,15 @@
+spec:
+  template:
+    spec:
+      containers:
+      - name: coredns
+        image: localhost:5000/coredns
+      volumes:
+      - name: config-volume
+        configMap:
+          name: coredns
+          items:
+          - key: Corefile
+            path: Corefile
+          - key: Zonefile
+            path: Zonefile
