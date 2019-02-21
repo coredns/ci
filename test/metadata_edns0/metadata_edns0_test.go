@@ -11,6 +11,7 @@ import (
 func TestMetadata(t *testing.T) {
 
 	corefileMeta := `.:53 {
+       health
 	   metadata
        metadata_edns0 {
           test 0xffee hex
@@ -40,9 +41,23 @@ func TestMetadata(t *testing.T) {
 		t.Fatalf("failed to execute query, got error: %s", err)
 	}
 
-	time.Sleep(1 * time.Second)
+	// Ensure that the logs have been collected before checking.
 	logged := kubernetes.CorednsLogs()
+	tries := 10
+	for {
+		if logged != "" {
+			break
+		}
+
+		tries -= 1
+		if tries == 0 {
+			t.Errorf("Failed to get logs")
+		}
+		time.Sleep(500 * time.Millisecond)
+		logged = kubernetes.CorednsLogs()
+	}
+
 	if !strings.Contains(logged, "Meta: abcdef0123") {
-		t.Errorf("Expected it to contain: Meta: abcdef0123")
+		t.Errorf("Expected it to contain: Meta: abcdef0123, got %v", logged)
 	}
 }
