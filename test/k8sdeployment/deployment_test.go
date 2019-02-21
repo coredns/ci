@@ -87,7 +87,7 @@ func TestKubernetesDeployment(t *testing.T) {
 	t.Run("Verify_coredns_healthy", func(t *testing.T) {
 		timeout := time.Second * time.Duration(90)
 
-		ips, err := kubernetes.CoreDNSPodIPs("kube-dns")
+		ips, err := kubernetes.CoreDNSPodIPs()
 		if err != nil {
 			t.Errorf("could not get coredns pod ips: %v", err)
 		}
@@ -120,7 +120,7 @@ func TestKubernetesDeployment(t *testing.T) {
 	})
 
 	t.Run("Verify_metrics_available", func(t *testing.T) {
-		ips, err := kubernetes.CoreDNSPodIPs("kube-dns")
+		ips, err := kubernetes.CoreDNSPodIPs()
 		if err != nil {
 			t.Errorf("could not get coredns pod ips: %v", err)
 		}
