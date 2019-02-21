@@ -248,7 +248,7 @@ func WaitNReady(maxWait, n int) error {
 func CorednsLogs() string {
 	name, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns | grep coredns | cut -f1 -d' ' | tr -d '\n'")
 	logs, _ := Kubectl("-n kube-system logs " + name)
-	return (logs)
+	return logs
 }
 
 // prepForConfigMap returns a config prepared for inclusion in a configmap definition
@@ -266,7 +266,7 @@ func prepForConfigMap(config string) string {
 
 // CoreDNSPodIPs return the ips of all coredns pods
 func CoreDNSPodIPs() ([]string, error) {
-	lines, err := Kubectl("-n kube-system get pods -l k8s-app=kube-dns -o wide | awk '{print $6}' | tail -n+2")
+	lines, err := Kubectl("-n kube-system get pods -l k8s-app=kube-dns  -o wide | awk '{print $6}' | tail -n+2")
 	if err != nil {
 		return nil, err
 	}

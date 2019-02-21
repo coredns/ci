@@ -4,6 +4,8 @@ test-deployment: fetch-deployment-pr fetch-coredns start-k8s test-k8s-deployment
 
 test-kubernetai: fetch-kubernetai-pr fetch-coredns build-kubernetai-docker start-k8s go-test-kubernetai
 
+test-metadata_edns0: fetch-metadata_edns0-pr fetch-coredns build-metadata_edns0-docker start-k8s go-test-metadata_edns0
+
 .PHONY: fetch-coredns-pr
 fetch-coredns-pr:
 	mkdir -p ${GOPATH}/src/${COREDNSPATH}
@@ -39,6 +41,15 @@ fetch-kubernetai-pr:
 	  git fetch origin +refs/pull/${PR}/merge:pr-${PR} && \
 	  git checkout pr-${PR}
 
+.PHONY: fetch-metadata_edns0-pr
+fetch-metadata_edns0-pr:
+	mkdir -p ${GOPATH}/src/${COREDNSPATH}
+	cd ${GOPATH}/src/${COREDNSPATH} && \
+	  git clone https://${COREDNSREPO}/metadata_edns0.git && \
+	  cd metadata_edns0 && \
+	  git fetch origin +refs/pull/${PR}/merge:pr-${PR} && \
+	  git checkout pr-${PR}
+
 .PHONY: start-image-repo
 start-image-repo:
 	# Start local docker image repo
@@ -57,6 +68,18 @@ build-docker: start-image-repo
 build-kubernetai-docker: start-image-repo
 	# Build coredns+kubernetai docker image, and push to local repo
 	cd ${GOPATH}/src/${COREDNSPATH}/kubernetai && \
+	  go get -v -d && \
+	  ${MAKE} coredns SYSTEM="GOOS=linux" && \
+	  mv ./coredns ../coredns/ && \
+	  cd ../coredns/ && \
+	  docker build -t coredns . && \
+	  docker tag coredns localhost:5000/coredns && \
+	  docker push localhost:5000/coredns
+
+.PHONY: build-metadata_edns0-docker
+build-metadata_edns0-docker: start-image-repo
+	# Build coredns+metadata_edns0 docker image, and push to local repo
+	cd ${GOPATH}/src/${COREDNSPATH}/metadata_edns0 && \
 	  go get -v -d && \
 	  ${MAKE} coredns SYSTEM="GOOS=linux" && \
 	  mv ./coredns ../coredns/ && \
@@ -84,6 +107,11 @@ test-k8s-deployment:
 go-test-kubernetai:
 	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/kubernetai>https://github.com/coredns/ci/tree/master/test/kubernetai</a>)
 	go test -v ./test/kubernetai/...
+
+.PHONY: go-test-metadata_edns0
+go-test-metadata_edns0:
+	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/metadata_edns0>https://github.com/coredns/ci/tree/master/test/metadata_edns0</a>)
+	go test -v ./test/metadata_edns0/...
 
 .PHONY: clean-k8s
 clean-k8s:
