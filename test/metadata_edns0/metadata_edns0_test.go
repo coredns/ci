@@ -34,7 +34,7 @@ func TestMetadata(t *testing.T) {
 		t.Errorf("could not get coredns test pod ip: %v", err)
 	}
 
-	digCmd := "dig @" + ipMeta[0] + " google.com +ednsopt=65518:ABCD123"
+	digCmd := "dig @" + ipMeta[0] + " google.com +ednsopt=65518:ABCDEF0123"
 	_, err = kubernetes.Kubectl("-n default exec coredns-test-client -- " + digCmd)
 	if err != nil {
 		t.Fatalf("failed to execute query, got error: %s", err)
@@ -42,7 +42,7 @@ func TestMetadata(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 	logged := kubernetes.CorednsLogs()
-	if !strings.Contains(logged, "Meta: abcd123") {
-		t.Errorf("Expected it to contain: Meta: abcd123")
+	if !strings.Contains(logged, "Meta: abcdef0123") {
+		t.Errorf("Expected it to contain: Meta: abcdef0123")
 	}
 }
