@@ -194,28 +194,6 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	return WaitReady(30)
 }
 
-func LoadCoreDNSTestCorefile(corefile, k8sapp string) error {
-
-	// apply configmap yaml
-	yamlString := coreDNSTestConfigmap + "\n"
-	yamlString += "  Corefile: |\n" + prepForConfigMap(corefile)
-
-	file, rmFunc, err := test.TempFile(os.TempDir(), yamlString)
-	if err != nil {
-		return err
-	}
-	defer rmFunc()
-	_, err = Kubectl("apply -f " + file)
-	if err != nil {
-		return err
-	}
-
-	// force coredns pod reload the config
-	Kubectl("-n kube-system delete pods -l k8s-app=" + k8sapp)
-
-	return WaitReady(30)
-}
-
 func LoadKubednsConfigmap(feddata, stubdata, upstreamdata string) error {
 
 	//apply configmap yaml
@@ -460,13 +438,6 @@ const (
 kind: ConfigMap
 metadata:
   name: coredns
-  namespace: kube-system
-data:`
-
-	coreDNSTestConfigmap = `apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: coredns-test
   namespace: kube-system
 data:`
 
