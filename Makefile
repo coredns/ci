@@ -20,8 +20,7 @@ fetch-coredns:
 	mkdir -p ${GOPATH}/src/${COREDNSPATH}
 	cd ${GOPATH}/src/${COREDNSPATH} && \
 	  git clone https://${COREDNSREPO}/coredns.git && \
-	  cd coredns && \
-	  ${MAKE} godeps
+	  cd coredns
 
 .PHONY: fetch-deployment-pr
 fetch-deployment-pr:
@@ -68,7 +67,7 @@ build-docker: start-image-repo
 build-kubernetai-docker: start-image-repo
 	# Build coredns+kubernetai docker image, and push to local repo
 	cd ${GOPATH}/src/${COREDNSPATH}/kubernetai && \
-	  go get -v -d && \
+	  GO111MODULE=on go get -v -d && \
 	  ${MAKE} coredns SYSTEM="GOOS=linux" && \
 	  mv ./coredns ../coredns/ && \
 	  cd ../coredns/ && \
@@ -80,7 +79,7 @@ build-kubernetai-docker: start-image-repo
 build-metadata_edns0-docker: start-image-repo
 	# Build coredns+metadata_edns0 docker image, and push to local repo
 	cd ${GOPATH}/src/${COREDNSPATH}/metadata_edns0 && \
-	  go get -v -d && \
+	  GO111MODULE=on go get -v -d && \
 	  ${MAKE} coredns SYSTEM="GOOS=linux" && \
 	  mv ./coredns ../coredns/ && \
 	  cd ../coredns/ && \
@@ -96,22 +95,22 @@ start-k8s:
 .PHONY: test-k8s
 test-k8s:
 	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/kubernetes>https://github.com/coredns/ci/tree/master/test/kubernetes</a>)
-	go test -v ./test/kubernetes/...
+	GO111MODULE=on go test -v ./test/kubernetes/...
 
 .PHONY: test-k8s-deployment
 test-k8s-deployment:
 	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/k8sdeployment>https://github.com/coredns/ci/tree/master/test/k8sdeployment</a>)
-	go test -v ./test/k8sdeployment/...
+	GO111MODULE=on go test -v ./test/k8sdeployment/...
 
 .PHONY: go-test-kubernetai
 go-test-kubernetai:
 	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/kubernetai>https://github.com/coredns/ci/tree/master/test/kubernetai</a>)
-	go test -v ./test/kubernetai/...
+	GO111MODULE=on go test -v ./test/kubernetai/...
 
 .PHONY: go-test-metadata_edns0
 go-test-metadata_edns0:
 	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/metadata_edns0>https://github.com/coredns/ci/tree/master/test/metadata_edns0</a>)
-	go test -v ./test/metadata_edns0/...
+	GO111MODULE=on go test -v ./test/metadata_edns0/...
 
 .PHONY: clean-k8s
 clean-k8s:
