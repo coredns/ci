@@ -1,4 +1,4 @@
-test-coredns: fetch-coredns-pr build-docker start-k8s test-k8s
+test-coredns: fetch-coredns-pr build-docker start-k8s test-k8s test-reload
 
 test-deployment: fetch-deployment-pr fetch-coredns start-k8s test-k8s-deployment
 
@@ -96,6 +96,11 @@ start-k8s:
 test-k8s:
 	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/kubernetes>https://github.com/coredns/ci/tree/master/test/kubernetes</a>)
 	GO111MODULE=on go test -v ./test/kubernetes/...
+
+.PHONY: test-reload
+test-reload:
+	# Integration tests (<a href=https://github.com/coredns/ci/tree/master/test/reload>https://github.com/coredns/ci/tree/master/test/reload</a>)
+	GO111MODULE=on go test -v ./test/reload/...
 
 .PHONY: test-k8s-deployment
 test-k8s-deployment:
