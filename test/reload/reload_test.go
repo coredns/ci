@@ -32,7 +32,7 @@ func TestReload(t *testing.T) {
 		t.Fatalf("failed to execute query, got error: %s", err)
 	}
 
-	if !strings.EqualFold(cmdOut, "10.0.1.2") {
+	if !strings.Contains(cmdOut, "10.0.1.2") {
 		t.Fatalf("coredns failed to load the Configmap")
 	}
 
@@ -61,7 +61,7 @@ func TestReload(t *testing.T) {
 	}
 
 	// check if the reload was successful and isn't using the previous ConfigMap.
-	if !strings.EqualFold(cmdOut, "10.0.1.20") {
+	if !strings.Contains(cmdOut, "10.0.1.20") {
 		t.Fatalf("coredns failed to reload and is using the previous Configmap")
 	}
 
