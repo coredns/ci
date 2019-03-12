@@ -79,7 +79,7 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
         pods verified
       }
       file /etc/coredns/Zonefile example.net
-      proxy internal ` + udp + `
+      forward internal ` + udp + `
     }
 `
 	exampleZonefile := `    ; example.net zone info for autopath tests
