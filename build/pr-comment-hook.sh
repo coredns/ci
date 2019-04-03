@@ -34,6 +34,7 @@ fi
 
 # Get Repo Name
 export SOURCEPROJ=$(echo ${PAYLOAD} | jq '.repository.name' | tr -d "\n\"")
+export SOURCEPROJFULL=$(echo ${PAYLOAD} | jq '.repository.full_name' | tr -d "\n\"")
 
 # Parse Issue Comment Event
 if [[ ${event_type} == "comment" ]]; then
@@ -57,7 +58,7 @@ if [[ ${event_type} == "comment" ]]; then
   fi
 
   # Get SHA for test head commit (used to update PR status)
-  export SHA=$(curl -s --user ${GHTOKEN} -X GET https://api.github.com/repos/${COREDNSFORK}/${SOURCEPROJ}/pulls/${PR} | jq '.head.sha' | tr -d "\n\"")
+  export SHA=$(curl -s --user ${GHTOKEN} -X GET https://api.github.com/repos/${SOURCEPROJFULL}/pulls/${PR} | jq '.head.sha' | tr -d "\n\"")
   if [[ "${SHA}" == "null" ]]; then
     exit 1
   fi
@@ -91,12 +92,12 @@ function rmWorkdir {
 
 function postComment {
     msg=$1
-    curl --user $GHTOKEN -X POST --data "{\"body\":\"$msg\"}" https://api.github.com/repos/${COREDNSFORK}/${SOURCEPROJ}/issues/${PR}/comments | jq '.id'
+    curl --user $GHTOKEN -X POST --data "{\"body\":\"$msg\"}" https://api.github.com/repos/${SOURCEPROJFULL}/issues/${PR}/comments | jq '.id'
 }
 
 function updateComment {
     msg=$1
-    curl --user $GHTOKEN -X POST --data "{\"body\":\"$msg\"}" https://api.github.com/repos/${COREDNSFORK}/${SOURCEPROJ}/issues/comments/${STATUSID}
+    curl --user $GHTOKEN -X POST --data "{\"body\":\"$msg\"}" https://api.github.com/repos/${SOURCEPROJFULL}/issues/comments/${STATUSID}
 }
 
 function postStatus {
@@ -104,7 +105,7 @@ function postStatus {
     descr=$2
     url=$3
     context="coredns/ci"
-    curl --user $GHTOKEN -X POST --data "{\"state\":\"$state\",\"description\":\"$descr\",\"target_url\":\"$url\",\"context\":\"$context\"}" https://api.github.com/repos/${COREDNSFORK}/${SOURCEPROJ}/statuses/${SHA}
+    curl --user $GHTOKEN -X POST --data "{\"state\":\"$state\",\"description\":\"$descr\",\"target_url\":\"$url\",\"context\":\"$context\"}" https://api.github.com/repos/${SOURCEPROJFULL}/statuses/${SHA}
 }
 
 function lockFail {
@@ -146,7 +147,6 @@ function startIntegrationTest {
     # Do integration setup and test
     postStatus "pending" "Integration test in progress." "$LOG_URL"
     trap finishIntegrationTest EXIT
-    export K8S_VERSION='v1.7.5'
     SECONDS=0
     make test-${SOURCEPROJ} >> /var/www/log/${SHA}.txt 2>&1
 }
@@ -176,6 +176,8 @@ function finishIntegrationTest {
 
   # Post result to pr
   postStatus "$state" "Integration test $summary" "$LOG_URL"
+  echo "# Test Summary" >> $logpath
+  echo "Integration test $summary" >> $logpath
   rmWorkdir
 }
 
