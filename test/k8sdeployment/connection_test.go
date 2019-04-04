@@ -23,9 +23,9 @@ func TestConnectionAfterAPIRestart(t *testing.T) {
 		t.Fatalf("deployment script failed: %s\nerr: %s", string(cmdout), err)
 	}
 
-	// Restart the Kubernetes APIserver
+	// Restart the Kubernetes APIserver and wait for it to come back up.
 	cmd = exec.Command("sh", "-c", "docker restart $(docker ps --no-trunc | grep 'kube-apiserver' | awk '{ print $1; }' > /dev/null")
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	// Get the restart count of the CoreDNS pods.
 	restartCount, err := kubernetes.Kubectl("-n kube-system get pods -l k8s-app=kube-dns -ojsonpath='{.items[*].status.containerStatuses[0].restartCount}'")
