@@ -3,9 +3,7 @@ package k8sdeployment
 import (
 	"os"
 	"os/exec"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/coredns/ci/test/kubernetes"
 )
@@ -23,21 +21,40 @@ func TestConnectionAfterAPIRestart(t *testing.T) {
 		t.Fatalf("deployment script failed: %s\nerr: %s", string(cmdout), err)
 	}
 
-	// Restart the Kubernetes APIserver and wait for it to come back up.
+	// Verify that the CoreDNS pods are up and ready.
+	maxWait := 120
+	if kubernetes.WaitNReady(maxWait, 2) != nil {
+		t.Fatalf("coredns failed to start in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
+	}
+
+	// Check if CoreDNS has restarted before the APIServer restart
+	restartCount, err := kubernetes.HasCoreDNSRestarted()
+	if err != nil {
+		t.Fatalf("error fetching CoreDNS pod restart count: %s", err)
+	}
+	if restartCount {
+		t.Fatalf("error as CoreDNS has crashed: %s.", kubernetes.CorednsLogs())
+	}
+
+	// Restart the Kubernetes APIServer.
 	dockerCmd, err := exec.Command("sh", "-c", "docker restart $(docker ps --no-trunc | grep 'kube-apiserver' | awk '{ print $1; }') > /dev/null").CombinedOutput()
 	if err != nil {
 		t.Fatalf("docker container restart failed: %s\nerr: %s", string(dockerCmd), err)
 	}
-	time.Sleep(15 * time.Second)
+	// Verify that the CoreDNS pods are up and ready after the restart.
+	maxWait = 120
+	if kubernetes.WaitNReady(maxWait, 2) != nil {
+		t.Fatalf("coredns failed to start in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
+	}
 
-	// Get the restart count of the CoreDNS pods.
-	restartCount, err := kubernetes.Kubectl("-n kube-system get pods -l k8s-app=kube-dns -ojsonpath='{.items[*].status.containerStatuses[0].restartCount}'")
+	// Check if CoreDNS has crashed after APIServer restart
+	restartCount, err = kubernetes.HasCoreDNSRestarted()
 	if err != nil {
 		t.Fatalf("error fetching CoreDNS pod restart count: %s", err)
 	}
 
 	// If CoreDNS crashes due to KubeAPIServer restart, Kubernetes will restart the CoreDNS containers.
-	if !strings.Contains(restartCount, "0") {
+	if restartCount {
 		t.Fatalf("failed as CoreDNS crashed due to KubeAPIServer restart.")
 	}
 }

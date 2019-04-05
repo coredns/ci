@@ -281,6 +281,20 @@ func CoreDNSPodIPs() ([]string, error) {
 	return ips, nil
 }
 
+// HasCoreDNSRestarted verifies if any of the CoreDNS containers has restarted.
+func HasCoreDNSRestarted() (bool, error) {
+	restartCount, err := Kubectl("-n kube-system get pods -l k8s-app=kube-dns -ojsonpath='{.items[*].status.containerStatuses[0].restartCount}'")
+	if err != nil {
+		return false, err
+	}
+
+	if !strings.Contains(restartCount, "0") {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 // Kubectl executes the kubectl command with the given arguments
 func Kubectl(args string) (result string, err error) {
 	kctl := os.Getenv("KUBECTL")
