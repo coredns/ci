@@ -28,7 +28,7 @@ func TestConnectionAfterAPIRestart(t *testing.T) {
 	if err != nil {
 		t.Fatalf("docker container restart failed: %s\nerr: %s", string(dockerCmd), err)
 	}
-	time.Sleep(10 * time.Second)
+	time.Sleep(15 * time.Second)
 
 	// Get the restart count of the CoreDNS pods.
 	restartCount, err := kubernetes.Kubectl("-n kube-system get pods -l k8s-app=kube-dns -ojsonpath='{.items[*].status.containerStatuses[0].restartCount}'")
