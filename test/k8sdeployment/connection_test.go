@@ -24,7 +24,10 @@ func TestConnectionAfterAPIRestart(t *testing.T) {
 	}
 
 	// Restart the Kubernetes APIserver and wait for it to come back up.
-	cmd = exec.Command("sh", "-c", "docker restart $(docker ps --no-trunc | grep 'kube-apiserver' | awk '{ print $1; }' > /dev/null")
+	dockerCmd, err := exec.Command("sh", "-c", "docker restart $(docker ps --no-trunc | grep 'kube-apiserver' | awk '{ print $1; }' > /dev/null").CombinedOutput()
+	if err != nil {
+		t.Fatalf("docker container restart failed: %s\nerr: %s", string(dockerCmd), err)
+	}
 	time.Sleep(10 * time.Second)
 
 	// Get the restart count of the CoreDNS pods.
