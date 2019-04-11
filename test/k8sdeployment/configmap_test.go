@@ -70,4 +70,10 @@ my.cluster.local:53 {
 	if strings.Compare(corefileTranslated, corefileExpected) != 0 {
 		t.Fatalf("failed test: Translation does not match")
 	}
+
+	// Clean-up by removing kube-dns ConfigMap
+	_, err = kubernetes.Kubectl("-n kube-system delete cm kube-dns")
+	if err != nil {
+		t.Fatalf("error deleting kube-dns ConfigMap: %s", err)
+	}
 }
