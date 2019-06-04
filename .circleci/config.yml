@@ -1,26 +1,177 @@
-version: 2.1
+version: 2
+
+initWorkingDir: &initWorkingDir
+  type: shell
+  name: Initialize Working Directory
+  pwd: /
+  command: |
+    mkdir -p ~/go/src/rajansandeep/ci
+    sudo chown -R circleci ~/go
+    mkdir -p ~/go/out/tests
+    mkdir -p ~/go/out/logs
+    mkdir -p /home/circleci/logs
+    GOROOT=$(go env GOROOT)
+    sudo rm -r $(go env GOROOT)
+    sudo mkdir $GOROOT
+    curl https://dl.google.com/go/go1.12.5.linux-amd64.tar.gz | sudo tar xz -C $GOROOT --strip-components=1
+
+integrationDefaults: &integrationDefaults
+  machine:
+    image: ubuntu-1604:201903-01
+  working_directory: ~/go/src/rajansandeep/ci
+  environment:
+    - K8S_VERSION: v1.13.3
+    - KUBECONFIG: /home/circleci/.kube/config
+    - MINIKUBE_VERSION: v0.33.1
+    - MINIKUBE_WANTUPDATENOTIFICATION: false
+    - MINIKUBE_WANTREPORTERRORPROMPT: false
+    - CHANGE_MINIKUBE_NONE_USER: true
+    - MINIKUBE_HOME: /home/circleci
+
+setupKubernetes: &setupKubernetes
+    - run:
+        name: Setup Kubernetes
+        command: |
+          # Setup Kubectl
+          curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+
+          # Setup Minikube
+          mkdir -p ${HOME}/.kube
+          touch ${HOME}/.kube/config
+          curl -Lo minikube https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION}/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+
+          # Start a local docker repository
+          docker run -d -p 5000:5000 --restart=always --name registry registry:2.6.2
+
+          # Start Minikube
+           sudo -E minikube start --vm-driver=none --cpus 2 --memory 2048 --kubernetes-version=${K8S_VERSION}
+
+          # Wait for minikube to setup
+          JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}';
+          until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
+            sleep 1;
+          done
+
+          # Scale the CoreDNS replicas to 1 for more accuracy.
+          kubectl scale -n kube-system deployment/coredns --replicas=1
+
+          # Patch CoreDNS to update deployment.
+          kubectl patch deployment coredns -n kube-system -p "$(cat ~/go/src/rajansandeep/ci/build/kubernetes/coredns_deployment_patch.yaml)"
+
+          # Deploy test objects
+          kubectl create -f ~/go/src/rajansandeep/ci/build/kubernetes/dns-test.yaml
+
+          # Add federation labels to node
+          kubectl label nodes minikube failure-domain.beta.kubernetes.io/zone=fdzone
+          kubectl label nodes minikube failure-domain.beta.kubernetes.io/region=fdregion
+
+          # Start local proxy (for out-of-cluster tests)
+          kubectl proxy --port=8080 2> /dev/null &
+          echo -n $! > sudo /var/run/kubectl_proxy.pid
+          sleep 3
+
+buildCoreDNSImage: &buildCoreDNSImage
+    - run:
+        name: Build latest CoreDNS Docker image
+        command: |
+          mkdir -p ~/go/src/rajansandeep/coredns
+          git clone https://github.com/rajansandeep/coredns ~/go/src/rajansandeep/coredns
+          cd ~/go/src/rajansandeep/coredns
+          make coredns SYSTEM="GOOS=linux" && \
+          docker build -t coredns . && \
+          docker tag coredns localhost:5000/coredns && \
+          docker push localhost:5000/coredns
+
+buildKubernetaiImage: &buildKubernetaiImage
+  - run:
+      name: Build latest CoreDNS+Kubernetai Docker image
+      command: |
+        mkdir -p ~/go/src/rajansandeep/kubernetai
+        git clone https://github.com/rajansandeep/kubernetai ~/go/src/rajansandeep/kubernetai
+
+        cd ~/go/src/rajansandeep/kubernetai
+        GO111MODULE=on go get -v -d
+        make coredns SYSTEM="GOOS=linux" && \
+        mv ./coredns ../coredns/
+        cd ../coredns/
+
+        docker build -t coredns . && \
+        docker tag coredns localhost:5000/coredns && \
+        docker push localhost:5000/coredns
+
+buildMetadataEdns0Image: &buildMetadataEdns0Image
+  - run:
+      name: Build latest CoreDNS+metadata_edns0 Docker image
+      command: |
+        mkdir -p ~/go/src/rajansandeep/metadata_edns0
+        git clone https://github.com/rajansandeep/metadata_edns0 ~/go/src/rajansandeep/metadata_edns0
+
+        cd ~/go/src/rajansandeep/metadata_edns0
+        GO111MODULE=on go get -v -d
+        make coredns SYSTEM="GOOS=linux" && \
+        mv ./coredns ../coredns/
+        cd ../coredns/
+
+        docker build -t coredns . && \
+        docker tag coredns localhost:5000/coredns && \
+        docker push localhost:5000/coredns
+
 jobs:
-  kuebrnetes:
-    working_directory: /go/src/github.com/rajansandeep/coredns
-    docker:
-      - image: rajansandeep/coredns:latest
-        environment:
-          GOPATH: /go
+  kubernetes-tests:
+    <<: *integrationDefaults
     steps:
+      - <<: *initWorkingDir
+      - checkout
+      - <<: *setupKubernetes
+      - <<: *buildCoreDNSImage
       - run:
-          name: kubernetes tests
-          command: make test-coredns
+          name: Run Kubernetes tests
+          command: |
+            cd ~/go/src/rajansandeep/ci/test/kubernetes
+            GO111MODULE=on go test -v ./...
+  k8s-deployment-tests:
+    <<: *integrationDefaults
+    steps:
+      - <<: *initWorkingDir
+      - checkout
+      - <<: *setupKubernetes
+      - <<: *buildCoreDNSImage
+      - run:
+          name: Run Kubernetes deployment tests
+          command: |
+            mkdir -p ~/go/src/rajansandeep/deployment
+            git clone https://github.com/rajansandeep/deployment ~/go/src/rajansandeep/deployment
+
+            cd ~/go/src/rajansandeep/ci/test/k8sdeployment
+            GO111MODULE=on go test -v ./...
+  external-plugin-tests:
+    <<: *integrationDefaults
+    steps:
+      - <<: *initWorkingDir
+      - checkout
+      - <<: *setupKubernetes
+      - run:
+          name: Clone CoreDNS repo
+          command: |
+            mkdir -p ~/go/src/rajansandeep/coredns
+            git clone https://github.com/rajansandeep/coredns ~/go/src/rajansandeep/coredns
+      - <<: *buildKubernetaiImage
+      - run:
+          name: Run Kubernetai plugin tests
+          command: |
+            cd ~/go/src/rajansandeep/ci/test/kubernetai
+            GO111MODULE=on go test -v ./...
+      - <<: *buildMetadataEdns0Image
+      - run:
+          name: Run metadata_edns0 plugin tests
+          command: |
+            cd ~/go/src/rajansandeep/ci/test/metadata_edns0
+            GO111MODULE=on go test -v ./...
+
 workflows:
-  version: 2.1
-  build_and_test:
+  version: 2
+  integration-tests:
     jobs:
-      - test
-      - e2e-hold:
-          type: approval
-      - e2e:
-          requires:
-            - e2e-hold
-      - master:
-          filters:
-            branches:
-              only: master
+      - kubernetes-tests
+      - k8s-deployment-tests
+      - external-plugin-tests

@@ -22,11 +22,15 @@ var tests = []test.Case{
 
 func TestKubernetesSecureAPI(t *testing.T) {
 
+	endpointIP, err := Kubectl("get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"InternalIP\")].address}'")
+	if err != nil {
+		t.Fatalf("Could not get Kubernetes Cluster IP: %s", err)
+	}
 	corefile :=
 		`.:0 {
     kubernetes cluster.local {
-        endpoint https://minikubeCA:8443
-        tls /root/.minikube/client.crt /root/.minikube/client.key /root/.minikube/ca.crt 
+        endpoint https://` + endpointIP + `:8443
+        tls /home/circleci/.minikube/client.crt /home/circleci/.minikube/client.key /home/circleci/.minikube/ca.crt 
     }`
 
 	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
@@ -48,71 +52,6 @@ func TestKubernetesSecureAPI(t *testing.T) {
 			t.Fatalf("Could not send query: %s", err)
 		}
 		if err := test.SortAndCheck(res, tc); err != nil {
-			t.Error(err)
-		}
-	}
-}
-
-func TestKubernetesAPIFallthrough(t *testing.T) {
-
-	corefile :=
-		`.:0 {
-    kubernetes cluster.local {
-	    endpoint localhost:8080 nonexistance:8080 invalidip:8080
-    }`
-
-	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
-	if err != nil {
-		t.Fatalf("Could not get CoreDNS serving instance: %s", err)
-	}
-	defer server.Stop()
-
-	// Work-around for timing condition that results in no-data being returned in test environment.
-	time.Sleep(3 * time.Second)
-
-	for _, tc := range tests {
-
-		c := new(dns.Client)
-		m := tc.Msg()
-
-		res, _, err := c.Exchange(m, udp)
-		if err != nil {
-			t.Fatalf("Could not send query: %s", err)
-		}
-		if err := test.SortAndCheck(res, tc); err != nil {
-			t.Error(err)
-		}
-	}
-}
-
-func TestKubernetesSecureAPIFallthrough(t *testing.T) {
-
-	corefile :=
-		`.:0 {
-    kubernetes cluster.local {
-        endpoint https://minikubeCA:8443 https://nonexistance:8443 https://invalidip:8443
-        tls /root/.minikube/client.crt /root/.minikube/client.key /root/.minikube/ca.crt 
-    }`
-
-	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
-	if err != nil {
-		t.Fatalf("Could not get CoreDNS serving instance: %s", err)
-	}
-	defer server.Stop()
-
-	// Work-around for timing condition that results in no-data being returned in test environment.
-	time.Sleep(3 * time.Second)
-
-	for _, tc := range tests {
-
-		c := new(dns.Client)
-		m := tc.Msg()
-
-		res, _, err := c.Exchange(m, udp)
-		if err != nil {
-			t.Fatalf("Could not send query: %s", err)
-		}
-		if test.SortAndCheck(res, tc); err != nil {
 			t.Error(err)
 		}
 	}
