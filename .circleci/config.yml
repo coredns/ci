@@ -31,7 +31,7 @@ integrationDefaults: &integrationDefaults
 setupKubernetes: &setupKubernetes
     - run:
         name: Setup Kubernetes
-        command: build/kubernetes/minikube_setup.sh
+        command: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/build/kubernetes/minikube_setup.sh
 
 buildCoreDNSImage: &buildCoreDNSImage
     - run:
