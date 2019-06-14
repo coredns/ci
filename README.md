@@ -1,30 +1,19 @@
 # ci
-Repository for continuous integration tests for the coredns project.  Currently only tests relating to kubernetes are contained here, but integration tests for other coredns plugins may be moved here or added here in the future. 
+
+Repository for continuous integration tests for the CoreDNS project. Currently tests relating to Kubernetes are contained here, but integration tests for other internal CoreDNS plugins may be moved here or added here in the future. 
+The repository also contains tests related to Kubernetes Deployment and external plugins (kubernetai, metadata_edns0).
 
 ### Running Tests
 
-You can initiate an integration test by including "/integration" in a comment for a PR in a linked repository.  The linked repositories are...
+The tests are run using CircleCI. New PRs in this repository will be tested against all the tests with CoreDNS built from master.
 
-* `coredns/coredns`: Issuing an integration test from a PR in this repo will run the tests in `/coredns/ci/tests/kubernetes`.  These test a variety of coredns configurations in an attempt to provide wide integration level coverage for the `kubernetes` plugin. 
-* `coredns/deployment`: Issuing an integration test from a PR in this repo will run the tests in `/coredns/ci/tests/k8sdeployment`.  This smaller set of tests validate the kubernetes deployment script creates a functional deployment.
-
-After making the comment, the CoreDNS CI Bot should post a status back in the originating PR that the request is received, and start the test.  The tests typically take a 3-5 minutes to run.
-
-The integration tests are executed one at a time, and no queue is implemented.  If a request is made while another test is in progress, it will wait for 5 minutes for the existing test to finish, or give up and update with an error the status to the originating PR.
-
-You may request multiple integration tests for the same PR, but only one log is kept per commit.  A new integration request will overwrite the prior integration test log of the same commit.
+The configuration is set in such a way that they can be run in your fork, in case you want to run the tests in your fork before submitting a PR here.
+CircleCI must be enabled on your fork for this to work.
 
 ### Adding and Testing New Tests, or Changes to Tests
 
-The go tests are located in `/tests` directory tree. `/build` contains scripts for spinning up/down the test environment such as starting up minikube environment for kubernetes related tests.
-
-When a test request is received, the `/coredns/ci` is cloned on the test server.  To test new tests, or changes to tests without merging first, you can specify a `/coredns/ci` PR number in the comment in the following way...
-
-```
-/integration-cipr22
-```
-
-The above will run integration tests using `/coredns/ci` PR 22.
+The go tests are located in `/tests` directory tree. `/build` contains scripts for spinning up the test environment such as starting up minikube environment for Kubernetes related tests.
+The configuration for running the tests is done in the .circleci/config.yaml file.
 
 ### Running Kubernetes Related CI Tests Locally
 
