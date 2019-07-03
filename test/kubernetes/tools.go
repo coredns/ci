@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mholt/caddy"
+	"github.com/caddyserver/caddy"
 	"github.com/miekg/dns"
 
 	// Load all managed plugins in github.com/coredns/coredns
