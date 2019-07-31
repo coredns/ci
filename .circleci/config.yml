@@ -81,6 +81,7 @@ buildMetadataEdns0Image: &buildMetadataEdns0Image
 
 jobs:
   coredns-benchmark-tests:
+    <<: *integrationDefaults
     steps:
       - <<: *initWorkingDir
       - checkout
