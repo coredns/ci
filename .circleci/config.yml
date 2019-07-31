@@ -80,6 +80,15 @@ buildMetadataEdns0Image: &buildMetadataEdns0Image
         docker push localhost:5000/coredns
 
 jobs:
+  coredns-benchmark-tests:
+    steps:
+      - <<: *initWorkingDir
+      - checkout
+      - run:
+          name: Run CoreDNS Benchmarks
+          command: |
+            cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
+            go test -v -bench=.  ./...
   kubernetes-tests:
     <<: *integrationDefaults
     steps:
@@ -135,6 +144,7 @@ workflows:
   version: 2
   integration-tests:
     jobs:
+      - coredns-benchmark-tests
       - kubernetes-tests
       - k8s-deployment-tests
       - external-plugin-tests
