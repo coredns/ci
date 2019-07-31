@@ -85,7 +85,11 @@ jobs:
     steps:
       - <<: *initWorkingDir
       - checkout
-      - <<: *buildCoreDNSImage
+      - run:
+          name: Clone CoreDNS repo
+          command: |
+            mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
+            git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
       - run:
           name: Run CoreDNS Benchmarks
           command: |
