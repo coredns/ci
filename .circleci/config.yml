@@ -85,6 +85,7 @@ jobs:
     steps:
       - <<: *initWorkingDir
       - checkout
+      - <<: *buildCoreDNSImage
       - run:
           name: Run CoreDNS Benchmarks
           command: |
