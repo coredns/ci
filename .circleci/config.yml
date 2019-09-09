@@ -21,7 +21,7 @@ integrationDefaults: &integrationDefaults
   working_directory: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
   environment:
     - K8S_VERSION: v1.15.3
-    - KIND_VERSION: v0.33.1
+    - KIND_VERSION: v0.5.1
     - KUBECONFIG: /home/circleci/.kube/config
 
 setupKubernetes: &setupKubernetes

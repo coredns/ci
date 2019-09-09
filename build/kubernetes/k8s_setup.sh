@@ -8,7 +8,7 @@ curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${K8S
 curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION}/kind-$(uname)-amd64 && chmod +x ./kind && mv ./kind /some-dir-in-your-PATH/kind
 
 # Create a single node cluster
-kind create cluster
+kind create cluster --image kindest/node:${K8S_VERSION}
 
 # Wait for cluster to be ready
 JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}';
