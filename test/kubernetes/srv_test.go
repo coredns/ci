@@ -165,6 +165,7 @@ func TestKubernetesSRV(t *testing.T) {
 	defer rmFunc()
 
 	corefile := `    .:53 {
+        ready
 	    errors
 	    log
         kubernetes cluster.local {

@@ -111,8 +111,9 @@ jobs:
           command: |
             mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment
             git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/deployment ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment
+            mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
+            git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/k8sdeployment
-            GO111MODULE=on go get
             GO111MODULE=on go test -v ./...
   external-plugin-tests:
     <<: *integrationDefaults

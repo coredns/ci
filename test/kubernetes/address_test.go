@@ -143,7 +143,6 @@ func TestKubernetesA(t *testing.T) {
 	corefile := `    .:53 {
         errors
         log
-        health
         ready
         kubernetes cluster.local 10.in-addr.arpa {
             namespaces test-1

@@ -28,6 +28,7 @@ var dnsTestCasesPodsInsecure = []test.Case{
 
 func TestKubernetesPodsInsecure(t *testing.T) {
 	corefile := `    .:53 {
+      ready
 	  errors
 	  log
       kubernetes cluster.local {
@@ -84,6 +85,7 @@ var dnsTestCasesPodsVerified = []test.Case{
 
 func TestKubernetesPodsVerified(t *testing.T) {
 	corefile := `    .:53 {
+      ready
 	  errors
 	  log
       kubernetes cluster.local {
