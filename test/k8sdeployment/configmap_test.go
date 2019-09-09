@@ -65,7 +65,7 @@ my.cluster.local:53 {
 	}
 
 	if strings.Compare(corefileTranslated, corefileExpected) != 0 {
-		t.Fatalf("failed test: Translation does not match")
+		t.Fatalf("failed test: Translation does not match.\nGOT:\n" + corefileTranslated + "\n\nEXPECTED:\n" + corefileExpected)
 	}
 
 	// Clean-up by removing kube-dns ConfigMap
