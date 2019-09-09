@@ -3,7 +3,7 @@ spec:
     spec:
       containers:
       - name: coredns
-        image: localhost:5000/coredns
+        image: coredns
       volumes:
       - name: config-volume
         configMap:

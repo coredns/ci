@@ -22,15 +22,10 @@ var tests = []test.Case{
 
 func TestKubernetesSecureAPI(t *testing.T) {
 
-	endpointIP, err := Kubectl("get nodes -o jsonpath='{.items[*].status.addresses[?(@.type==\"InternalIP\")].address}'")
-	if err != nil {
-		t.Fatalf("Could not get Kubernetes Cluster IP: %s", err)
-	}
 	corefile :=
 		`.:0 {
     kubernetes cluster.local {
-        endpoint https://` + endpointIP + `:8443
-        tls /home/circleci/.minikube/client.crt /home/circleci/.minikube/client.key /home/circleci/.minikube/ca.crt 
+        kubeconfig /home/circleci/.kube/kind-config-kind kubernetes-admin@kind
     }`
 
 	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
