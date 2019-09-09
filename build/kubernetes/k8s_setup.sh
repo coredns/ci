@@ -10,6 +10,8 @@ curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/${KIND
 # Create a single node cluster
 kind create cluster --image kindest/node:${K8S_VERSION}
 
+export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+
 # Wait for cluster to be ready
 JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}';
 until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
