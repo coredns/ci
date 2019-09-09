@@ -37,7 +37,8 @@ buildCoreDNSImage: &buildCoreDNSImage
           git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
           cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
           make coredns SYSTEM="GOOS=linux" && \
-          docker build -t coredns .
+          docker build -t coredns . && \
+          kind load docker-image coredns
 
 buildKubernetaiImage: &buildKubernetaiImage
   - run:
@@ -53,6 +54,7 @@ buildKubernetaiImage: &buildKubernetaiImage
         cd ../coredns/
 
         docker build -t coredns .
+        kind load docker-image coredns
 
 buildMetadataEdns0Image: &buildMetadataEdns0Image
   - run:
@@ -68,6 +70,7 @@ buildMetadataEdns0Image: &buildMetadataEdns0Image
         cd ../coredns/
 
         docker build -t coredns .
+        kind load docker-image coredns
 
 jobs:
   coredns-benchmark-tests:
