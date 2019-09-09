@@ -222,21 +222,14 @@ func WaitReady(maxWait int) error {
 
 // WaitReady waits for n corednses to be ready or times out after maxWait seconds with an error
 func WaitNReady(maxWait, n int) error {
-
-	running := 0
 	for {
-		o, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns")
-		if strings.Count(o, "Running") == n {
-			running += 1
-		}
-		if running >= 4 {
-			// give coredns a few extra seconds to read its config and get k8s cache
+		o, _ := Kubectl("-n kube-system get pods -l k8s-app=kube-dns -o jsonpath='{.items[*].status.containerStatuses[*].ready}'")
+		if strings.Count(o, "true") == n {
 			break
 		}
 		time.Sleep(time.Second)
 		maxWait = maxWait - 1
 		if maxWait == 0 {
-			//println(o)
 			logs := CorednsLogs()
 			return errors.New("timeout waiting for coredns to be ready. coredns log: " + logs)
 		}
