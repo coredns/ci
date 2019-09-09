@@ -3,6 +3,7 @@ spec:
     spec:
       containers:
       - name: coredns
+        livenessProbe: {}
         image: coredns
       volumes:
       - name: config-volume
