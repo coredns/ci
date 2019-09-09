@@ -11,6 +11,10 @@ import (
 // is valid and there are no failures.
 // This test is to catch bugs/errors such as the one reported in https://github.com/coredns/coredns/issues/2464
 func TestConnectionAfterAPIRestart(t *testing.T) {
+
+	t.Skip("Test needs to be refactored for kind environment")
+	return
+
 	// Apply manifests via coredns/deployment deployment script ...
 	cmd := exec.Command("sh", "-c", " ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment/kubernetes/deploy.sh -s -i 10.96.0.10 -r 10.96.0.0/8 -r 172.17.0.0/16 | kubectl apply -f -")
 	cmdout, err := cmd.CombinedOutput()
