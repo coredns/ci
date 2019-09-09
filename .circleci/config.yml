@@ -20,7 +20,7 @@ integrationDefaults: &integrationDefaults
     image: ubuntu-1604:201903-01
   working_directory: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
   environment:
-    - K8S_VERSION: v1.15.3
+    - K8S_VERSION: v1.13.3
     - KIND_VERSION: v0.5.1
     - KUBECONFIG: /home/circleci/.kube/kind-config-kind
 
@@ -111,8 +111,8 @@ jobs:
           command: |
             mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment
             git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/deployment ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment
-
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/k8sdeployment
+            GO111MODULE=on go get
             GO111MODULE=on go test -v ./...
   external-plugin-tests:
     <<: *integrationDefaults
