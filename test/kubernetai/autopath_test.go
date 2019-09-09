@@ -89,6 +89,7 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 
 	corefile :=
 		`    .:53 {
+        health
         ready
         errors
         log

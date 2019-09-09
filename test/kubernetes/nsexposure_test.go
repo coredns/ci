@@ -29,6 +29,7 @@ var dnsTestCasesAllNSExposed = []test.Case{
 func TestKubernetesNSExposed(t *testing.T) {
 	corefile :=
 		`    .:53 {
+      health
       ready
       errors
       log

@@ -14,9 +14,9 @@ func TestConfigMapTranslation(t *testing.T) {
 	upstreamdata := `["8.8.8.8", "8.8.4.4"]`
 
 	corefileExpected := `.:53 {
-    errors
     health
     ready
+    errors
     kubernetes cluster.local  10.96.0.0/8 172.17.0.0/16 {
       pods insecure
       fallthrough in-addr.arpa ip6.arpa

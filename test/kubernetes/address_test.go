@@ -141,9 +141,10 @@ func TestKubernetesA(t *testing.T) {
 	defer rmFunc()
 
 	corefile := `    .:53 {
+        health
+        ready
         errors
         log
-        ready
         kubernetes cluster.local 10.in-addr.arpa {
             namespaces test-1
             upstream ` + udp + `

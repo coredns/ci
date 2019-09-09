@@ -28,6 +28,7 @@ var dnsTestCasesPodsInsecure = []test.Case{
 
 func TestKubernetesPodsInsecure(t *testing.T) {
 	corefile := `    .:53 {
+      health
       ready
 	  errors
 	  log
@@ -85,6 +86,7 @@ var dnsTestCasesPodsVerified = []test.Case{
 
 func TestKubernetesPodsVerified(t *testing.T) {
 	corefile := `    .:53 {
+      health
       ready
 	  errors
 	  log

@@ -81,6 +81,7 @@ func TestKubernetesDeployment(t *testing.T) {
 		}
 	})
 
+
 	t.Run("Verify_coredns_healthy", func(t *testing.T) {
 		timeout := time.Second * time.Duration(90)
 

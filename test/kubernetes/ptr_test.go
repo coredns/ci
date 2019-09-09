@@ -56,6 +56,7 @@ var dnsTestCasesPTR = []test.Case{
 
 func TestKubernetesPTR(t *testing.T) {
 	corefile := `    .:53 {
+        health
         ready
         errors
         log

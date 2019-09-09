@@ -58,6 +58,7 @@ func TestKubernetesFallthrough(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	corefile := `    .:53 {
+      health
       ready
 	  errors
 	  log
@@ -127,6 +128,7 @@ func TestKubernetesFallthroughFiltered(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	corefile := `    .:53 {
+      health
       ready
 	  errors
 	  log
