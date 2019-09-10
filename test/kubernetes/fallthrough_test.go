@@ -58,6 +58,8 @@ func TestKubernetesFallthrough(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	corefile := `    .:53 {
+      health
+      ready
 	  errors
 	  log
       file /etc/coredns/Zonefile cluster.local
@@ -126,6 +128,8 @@ func TestKubernetesFallthroughFiltered(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	corefile := `    .:53 {
+      health
+      ready
 	  errors
 	  log
       file /etc/coredns/Zonefile cluster.local

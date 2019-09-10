@@ -82,6 +82,10 @@ func TestKubernetesDeployment(t *testing.T) {
 	})
 
 	t.Run("Verify_coredns_healthy", func(t *testing.T) {
+
+		t.Skip("Test needs to be refactored for kind environment")
+		return
+
 		timeout := time.Second * time.Duration(90)
 
 		ips, err := kubernetes.CoreDNSPodIPs()
@@ -117,6 +121,10 @@ func TestKubernetesDeployment(t *testing.T) {
 	})
 
 	t.Run("Verify_metrics_available", func(t *testing.T) {
+
+		t.Skip("Test needs to be refactored for kind environment")
+		return
+
 		ips, err := kubernetes.CoreDNSPodIPs()
 		if err != nil {
 			t.Errorf("could not get coredns pod ips: %v", err)

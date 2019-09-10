@@ -51,6 +51,8 @@ var dnsTestCases = []test.Case{
 func TestKubernetai(t *testing.T) {
 
 	corefile := `    .:53 {
+        health
+        ready
         errors
         log
         kubernetai cluster.local 10.in-addr.arpa {

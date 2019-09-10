@@ -11,6 +11,7 @@ import (
 func TestMetadata(t *testing.T) {
 
 	corefileMeta := `.:53 {
+       ready
        health
 	   metadata
        metadata_edns0 {
