@@ -15,7 +15,9 @@ func TestConfigMapTranslation(t *testing.T) {
 
 	corefileExpected := `.:53 {
     errors
-    health
+    health {
+      lameduck 12s
+    }
     ready
     kubernetes cluster.local  10.96.0.0/8 172.17.0.0/16 {
       pods insecure
