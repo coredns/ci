@@ -24,7 +24,7 @@ func TestConnectionAfterAPIRestart(t *testing.T) {
 
 	// Verify that the CoreDNS pods are up and ready.
 	maxWait := 120
-	if kubernetes.WaitNReady(maxWait, 2) != nil {
+	if kubernetes.WaitNReady(maxWait, 1) != nil {
 		t.Fatalf("coredns failed to start in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
 	}
 
@@ -44,7 +44,7 @@ func TestConnectionAfterAPIRestart(t *testing.T) {
 	}
 	// Verify that the CoreDNS pods are up and ready after the restart.
 	maxWait = 120
-	if kubernetes.WaitNReady(maxWait, 2) != nil {
+	if kubernetes.WaitNReady(maxWait, 1) != nil {
 		t.Fatalf("coredns failed to start in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
 	}
 

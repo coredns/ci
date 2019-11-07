@@ -76,7 +76,7 @@ func TestKubernetesDeployment(t *testing.T) {
 
 	t.Run("Verify_coredns_starts", func(t *testing.T) {
 		maxWait := 120
-		if kubernetes.WaitNReady(maxWait, 2) != nil {
+		if kubernetes.WaitNReady(maxWait, 1) != nil {
 			t.Fatalf("coredns failed to start in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
 		}
 	})
@@ -92,8 +92,8 @@ func TestKubernetesDeployment(t *testing.T) {
 		if err != nil {
 			t.Errorf("could not get coredns pod ips: %v", err)
 		}
-		if len(ips) != 2 {
-			t.Errorf("Expected 2 pods, found: %v", len(ips))
+		if len(ips) != 1 {
+			t.Errorf("Expected 1 pod ip, found: %v", len(ips))
 		}
 		for _, ip := range ips {
 			start := time.Now()
@@ -129,8 +129,8 @@ func TestKubernetesDeployment(t *testing.T) {
 		if err != nil {
 			t.Errorf("could not get coredns pod ips: %v", err)
 		}
-		if len(ips) != 2 {
-			t.Errorf("Expected 2 pods, found: %v", len(ips))
+		if len(ips) != 1 {
+			t.Errorf("Expected 1 pod ip, found: %v", len(ips))
 		}
 		for _, ip := range ips {
 			mf := test.Scrape("http://" + ip + ":9153/metrics")
