@@ -153,6 +153,9 @@ func TestKubernetesDeployment(t *testing.T) {
 			if err != nil {
 				t.Errorf(err.Error())
 			}
+			if res == nil {
+				t.Fatalf("got no response")
+			}
 			test.CNAMEOrder(res)
 			if err := test.SortAndCheck(res, tc); err != nil {
 				t.Error(err)
@@ -169,6 +172,9 @@ func TestKubernetesDeployment(t *testing.T) {
 			res, err := kubernetes.DoIntegrationTest(tc, namespace)
 			if err != nil {
 				t.Error(err)
+			}
+			if res == nil {
+				t.Fatalf("got no response")
 			}
 			test.CNAMEOrder(res)
 			// Just compare the cardinality of the response to expected
