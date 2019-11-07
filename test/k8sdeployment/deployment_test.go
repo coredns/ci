@@ -63,8 +63,7 @@ var deploymentDNSCasesFuzzy = []test.Case{
 	},
 }
 
-func TestKubernetesDeployment(t *testing.T) {
-
+func TestKubernetesDeploymentDeploys(t *testing.T) {
 	t.Run("Deploy_with_deploy.sh", func(t *testing.T) {
 		// Apply manifests via coredns/deployment deployment script ...
 		cmd := exec.Command("sh", "-c", " ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment/kubernetes/deploy.sh -i 10.96.0.10 -r 10.96.0.0/8 -r 172.17.0.0/16 | kubectl apply -f -")
@@ -73,14 +72,18 @@ func TestKubernetesDeployment(t *testing.T) {
 			t.Fatalf("deployment script failed: %s\nerr: %s", string(cmdout), err)
 		}
 	})
+}
 
+func TestKubernetesDeploymentStarts(t *testing.T) {
 	t.Run("Verify_coredns_starts", func(t *testing.T) {
 		maxWait := 120
 		if kubernetes.WaitNReady(maxWait, 1) != nil {
 			t.Fatalf("coredns failed to start in %v seconds,\nlog: %v", maxWait, kubernetes.CorednsLogs())
 		}
 	})
+}
 
+func TestKubernetesDeploymentHealthy(t *testing.T) {
 	t.Run("Verify_coredns_healthy", func(t *testing.T) {
 
 		t.Skip("Test needs to be refactored for kind environment")
@@ -119,7 +122,9 @@ func TestKubernetesDeployment(t *testing.T) {
 			}
 		}
 	})
+}
 
+func TestKubernetesDeploymentMetrics(t *testing.T) {
 	t.Run("Verify_metrics_available", func(t *testing.T) {
 
 		t.Skip("Test needs to be refactored for kind environment")
@@ -139,7 +144,9 @@ func TestKubernetesDeployment(t *testing.T) {
 			}
 		}
 	})
+}
 
+func TestKubernetesDeploymentDNSQueries(t *testing.T) {
 	// Verify dns query test strict cases
 	testCases := deploymentDNSCases
 	namespace := "test-1"
