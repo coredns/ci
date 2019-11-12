@@ -2,10 +2,10 @@ package k8sdeployment
 
 import (
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/coredns/ci/test/kubernetes"
-	"strings"
 )
 
 func TestConfigMapTranslation(t *testing.T) {
@@ -16,7 +16,7 @@ func TestConfigMapTranslation(t *testing.T) {
 	corefileExpected := `.:53 {
     errors
     health {
-      lameduck 12s
+      lameduck 5s
     }
     ready
     kubernetes cluster.local  10.96.0.0/8 172.17.0.0/16 {
