@@ -21,13 +21,6 @@ var deploymentDNSCases = []test.Case{
 			test.A("svc-1-a.test-1.svc.cluster.local.      5    IN      A       10.96.0.100"),
 		},
 	},
-	{ // A query for an ip-style pod dns name should return a record
-		Qname: "10-20-0-101.test-1.pod.cluster.local.", Qtype: dns.TypeA,
-		Rcode: dns.RcodeSuccess,
-		Answer: []dns.RR{
-			test.A("10-20-0-101.test-1.pod.cluster.local. 303 IN A    10.20.0.101"),
-		},
-	},
 	{ // A PTR record query for an existing service should return a record
 		Qname: "100.0.96.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
