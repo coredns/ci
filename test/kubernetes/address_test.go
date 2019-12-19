@@ -78,7 +78,7 @@ var dnsTestCasesA = []test.Case{
 		Qname: "dns-version.cluster.local.", Qtype: dns.TypeTXT,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.TXT(`dns-version.cluster.local. 303 IN TXT "1.0.1"`),
+			test.TXT(`dns-version.cluster.local. 303 IN TXT "1.1.0"`),
 		},
 	},
 	{ // An AAAA record query for an existing headless service should return a record for each of its ipv6 endpoints
