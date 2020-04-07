@@ -171,8 +171,8 @@ func TestKubernetesSRV(t *testing.T) {
 	    log
         kubernetes cluster.local {
             namespaces test-1
-            upstream ` + udp + `
-        }
+		}
+		forward . ` + udp + `
     }
 `
 
