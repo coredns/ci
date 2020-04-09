@@ -57,7 +57,7 @@ var dnsTestCasesA = []test.Case{
 			test.A("*.test-1.svc.cluster.local.      303    IN      A       172.17.0.254"),
 			test.A("*.test-1.svc.cluster.local.      303    IN      A       172.17.0.255"),
 			test.CNAME("*.test-1.svc.cluster.local.  303    IN      CNAME   example.net."),
-			// test.A("example.net.                     303    IN      A       13.14.15.16"), // Not resolved because no proxy is defined.
+			test.A("example.net.                     303    IN      A       13.14.15.16"),
 		},
 	},
 	{ // A wild card service name in an un-exposed namespace result in nxdomain
@@ -146,9 +146,9 @@ func TestKubernetesA(t *testing.T) {
         errors
         log
         kubernetes cluster.local 10.in-addr.arpa {
-            namespaces test-1
-            upstream ` + udp + `
-        }
+			namespaces test-1
+		}
+		forward . ` + udp + `
     }
 `
 
