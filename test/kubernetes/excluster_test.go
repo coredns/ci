@@ -25,7 +25,7 @@ func TestKubernetesSecureAPI(t *testing.T) {
 	corefile :=
 		`.:0 {
     kubernetes cluster.local {
-        kubeconfig /home/circleci/.kube/kind-config-kind kubernetes-admin@kind
+        kubeconfig /home/circleci/.kube/kind-config-kind kind-kind
     }`
 
 	server, udp, _, err := intTest.CoreDNSServerAndPorts(corefile)
