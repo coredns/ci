@@ -9,7 +9,6 @@ import (
 )
 
 func TestConfigMapTranslation(t *testing.T) {
-	feddata := `{"foo" : "foo.fed.com", "bar.com" : "bar.fed.com"}`
 	stubdata := `{"abc.com" : ["1.2.3.4:5300","4.4.4.4"], "my.cluster.local" : ["2.3.4.5:5300"]}`
 	upstreamdata := `["8.8.8.8", "8.8.4.4"]`
 
@@ -21,10 +20,6 @@ func TestConfigMapTranslation(t *testing.T) {
     ready
     kubernetes cluster.local  10.96.0.0/8 172.17.0.0/16 {
       fallthrough in-addr.arpa ip6.arpa
-    }
-    federation {
-      foo foo.fed.com
-      bar.com bar.fed.com
     }
     prometheus :9153
     forward . 8.8.8.8 8.8.4.4
@@ -48,7 +43,7 @@ my.cluster.local:53 {
 }
 `
 
-	err := kubernetes.LoadKubednsConfigmap(feddata, stubdata, upstreamdata)
+	err := kubernetes.LoadKubednsConfigmap(stubdata, upstreamdata)
 	if err != nil {
 		t.Fatalf("Could not load corefile: %s", err)
 	}

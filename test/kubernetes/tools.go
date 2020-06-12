@@ -194,12 +194,11 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 	return WaitReady(30)
 }
 
-func LoadKubednsConfigmap(feddata, stubdata, upstreamdata string) error {
+func LoadKubednsConfigmap(stubdata, upstreamdata string) error {
 
 	//apply configmap yaml
 	yamlString := KubednsConfigmap + "\n"
 	yamlString += "  upstreamNameservers: |\n" + prepForConfigMap(upstreamdata)
-	yamlString += "  federations: |\n" + prepForConfigMap(feddata)
 	yamlString += "  stubDomains: |\n" + prepForConfigMap(stubdata)
 
 	file, rmFunc, err := test.TempFile(os.TempDir(), yamlString)
