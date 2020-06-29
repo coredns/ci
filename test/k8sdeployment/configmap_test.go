@@ -22,7 +22,9 @@ func TestConfigMapTranslation(t *testing.T) {
       fallthrough in-addr.arpa ip6.arpa
     }
     prometheus :9153
-    forward . 8.8.8.8 8.8.4.4
+    forward . 8.8.8.8 8.8.4.4 {
+      max_concurrent 1000
+    }
     cache 30
     loop
     reload
@@ -32,14 +34,18 @@ abc.com:53 {
   errors
   cache 30
   loop
-  forward . 1.2.3.4:5300
+  forward . 1.2.3.4:5300 {
+    max_concurrent 1000
+  }
 }
 
 my.cluster.local:53 {
   errors
   cache 30
   loop
-  forward . 2.3.4.5:5300
+  forward . 2.3.4.5:5300 {
+    max_concurrent 1000
+  }
 }
 `
 
