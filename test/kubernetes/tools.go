@@ -2,6 +2,8 @@ package kubernetes
 
 import (
 	"bufio"
+	"errors"
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -9,17 +11,13 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-
-	"github.com/coredns/coredns/plugin/test"
-	intTest "github.com/coredns/coredns/test"
-
-	"errors"
-	"fmt"
 	"time"
 
-	"github.com/caddyserver/caddy"
-	"github.com/miekg/dns"
+	"github.com/coredns/caddy"
+	"github.com/coredns/coredns/plugin/test"
+	ctest "github.com/coredns/coredns/test"
 
+	"github.com/miekg/dns"
 	// Load all managed plugins in github.com/coredns/coredns
 	_ "github.com/coredns/coredns/core/plugin"
 )
@@ -139,7 +137,7 @@ func UpstreamServer(t *testing.T, zone, zoneFile string) (func(), *caddy.Instanc
     file ` + upfile + ` ` + zone + `
     bind ` + locaIP().String() + `
 }`
-	server, udp, _, err := intTest.CoreDNSServerAndPorts(upstreamCorefile)
+	server, udp, _, err := ctest.CoreDNSServerAndPorts(upstreamCorefile)
 	if err != nil {
 		t.Fatalf("could not get CoreDNS serving instance: %s", err)
 	}
