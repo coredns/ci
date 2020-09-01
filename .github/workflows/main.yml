@@ -1,0 +1,80 @@
+name: CI
+
+'on':
+  - push
+  - pull_request
+
+env:
+  GOPROXY: https://proxy.golang.org
+  GOPATH: ${{ github.workspace }}/go
+
+jobs:
+  verify-goimports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+          stable: true
+
+      - run: |
+          echo "::set-env name=GOPATH::${HOME}/go"
+      - uses: actions/checkout@v2
+
+      - name: verify goimports
+        run: |
+          files=$(go run golang.org/x/tools/cmd/goimports -format-only -l .)
+          # Sadly goimports doesn't use exit codes
+          if [[ -n "${files}" ]]; then
+            echo "::error ::goimports should be run on these files:"
+            echo "${files}"
+            exit 1
+          fi
+  verify-gomod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+          stable: true
+
+      - run: |
+          echo "::set-env name=GOPATH::${HOME}/go"
+      - uses: actions/checkout@v2
+
+      - run: go mod tidy
+
+      - run: |
+          changes=$(git status --porcelain)
+          if [[ -n "${changes}" ]]; then
+            echo "::error Changes detected from go mod tidy:"
+            echo "${changes}"
+            exit 1
+          fi
+  kind-e2e:
+    name: Test with a Kind cluster
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.14
+      - name: Install latest version of Kind
+        run: |
+          GO111MODULE=on go get sigs.k8s.io/kind
+      - name: Create Kind cluster
+        run: |
+          PATH=$(go env GOPATH)/bin:$PATH kind create cluster --config .github/workflows/kind-config.yaml
+      - name: Run some sanity checks
+        # kubectl is already installed on the Github Ubuntu worker
+        run: |
+          # Scale the CoreDNS replicas to simplify testing
+          kubectl scale -n kube-system deployment/coredns --replicas=1
+
+          # Patch CoreDNS deployment to use local coredns image
+          kubectl patch deployment coredns -n kube-system -p "$(cat build/kubernetes/coredns_deployment_patch.yaml)"
+
+          # Deploy test objects
+          kubectl create -f build/kubernetes/dns-test.yaml
