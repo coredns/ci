@@ -289,7 +289,7 @@ func HasResourceRestarted(label string) (bool, error) {
 			}
 		}
 
-		if !hasRestarted {
+		if hasRestarted {
 			break
 		}
 		time.Sleep(time.Second)
