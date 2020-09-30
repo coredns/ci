@@ -277,17 +277,21 @@ func HasResourceRestarted(label string) (bool, error) {
 	wait := 5
 
 	for {
+		hasRestarted := false
 		restartCount, err := Kubectl(fmt.Sprintf("-n kube-system get pods -l %s -ojsonpath='{.items[*].status.containerStatuses[0].restartCount}'", label))
 		if err != nil {
 			return false, err
 		}
 		individualCount := strings.Split(restartCount, " ")
 		for _, count := range individualCount {
-			if count == "0" {
-				break
+			if count != "0" {
+				hasRestarted = true
 			}
 		}
 
+		if !hasRestarted {
+			break
+		}
 		time.Sleep(time.Second)
 		wait--
 		if wait == 0 {
