@@ -2,8 +2,8 @@ package k8sdeployment
 
 import (
 	"fmt"
-	"net/http"
 	"os/exec"
+	"strings"
 	"testing"
 	"time"
 
@@ -78,11 +78,12 @@ func TestKubernetesDeploymentStarts(t *testing.T) {
 
 func TestKubernetesDeploymentHealthy(t *testing.T) {
 	t.Run("Verify_coredns_healthy", func(t *testing.T) {
-
-		t.Skip("Test needs to be refactored for kind environment")
-		return
-
 		timeout := time.Second * time.Duration(90)
+
+		containerID, err := kubernetes.FetchDockerContainerID("kind-control-plane")
+		if err != nil {
+			t.Fatalf("docker container ID not found, err: %s", err)
+		}
 
 		ips, err := kubernetes.CoreDNSPodIPs()
 		if err != nil {
@@ -91,19 +92,20 @@ func TestKubernetesDeploymentHealthy(t *testing.T) {
 		if len(ips) != 1 {
 			t.Errorf("Expected 1 pod ip, found: %v", len(ips))
 		}
+
 		for _, ip := range ips {
 			start := time.Now()
 			for {
-				resp, err := http.Get("http://" + ip + ":8080/health")
+				cmd := fmt.Sprintf("docker exec -i %s /bin/sh -c \"curl http://%s:8080/health\"", containerID, ip)
+				resp, err := exec.Command("sh", "-c", cmd).CombinedOutput()
 				if err != nil {
 					t.Logf("pod (%v) healthy check error %v", ip, err)
 					time.Sleep(time.Second)
 					continue
 				}
 
-				// Any code greater than or equal to 200 and less than 400 indicates success.
-				// Any other code indicates failure.
-				if resp.StatusCode >= 200 && resp.StatusCode < 400 {
+				if strings.Contains(string(resp), "OK") {
+					// success
 					break
 				}
 
@@ -120,8 +122,10 @@ func TestKubernetesDeploymentHealthy(t *testing.T) {
 func TestKubernetesDeploymentMetrics(t *testing.T) {
 	t.Run("Verify_metrics_available", func(t *testing.T) {
 
-		t.Skip("Test needs to be refactored for kind environment")
-		return
+		containerID, err := kubernetes.FetchDockerContainerID("kind-control-plane")
+		if err != nil {
+			t.Fatalf("docker container ID not found, err: %s", err)
+		}
 
 		ips, err := kubernetes.CoreDNSPodIPs()
 		if err != nil {
@@ -130,8 +134,13 @@ func TestKubernetesDeploymentMetrics(t *testing.T) {
 		if len(ips) != 1 {
 			t.Errorf("Expected 1 pod ip, found: %v", len(ips))
 		}
+
 		for _, ip := range ips {
-			mf := test.Scrape("http://" + ip + ":9153/metrics")
+			cmd := fmt.Sprintf("docker exec -i %s /bin/sh -c \"curl http://%s:9153/metrics\"", containerID, ip)
+			mf, err := exec.Command("sh", "-c", cmd).CombinedOutput()
+			if err != nil {
+				t.Errorf("error while trying to run command in docker container: %s", err)
+			}
 			if len(mf) == 0 {
 				t.Errorf("unable to scrape metrics from %v", ip)
 			}

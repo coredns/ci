@@ -24,7 +24,3 @@ kubectl patch deployment coredns -n kube-system -p "$(cat ~/go/src/${CIRCLE_PROJ
 
 # Deploy test objects
 kubectl create -f ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/build/kubernetes/dns-test.yaml
-
-# Add federation labels to node
-kubectl label nodes kind-control-plane failure-domain.beta.kubernetes.io/zone=fdzone
-kubectl label nodes kind-control-plane failure-domain.beta.kubernetes.io/region=fdregion

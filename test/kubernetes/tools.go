@@ -101,7 +101,7 @@ func StartClientPod(namespace string) error {
 			break
 		}
 	}
-	return errors.New("timeout waiting for " + clientName + " to be ready.")
+	return errors.New("timeout waiting for " + clientName + " to be ready")
 
 }
 
@@ -271,18 +271,49 @@ func CoreDNSPodIPs() ([]string, error) {
 	return ips, nil
 }
 
-// HasCoreDNSRestarted verifies if any of the CoreDNS containers has restarted.
-func HasCoreDNSRestarted() (bool, error) {
-	restartCount, err := Kubectl("-n kube-system get pods -l k8s-app=kube-dns -ojsonpath='{.items[*].status.containerStatuses[0].restartCount}'")
+// HasResourceRestarted verifies if any of the specified containers in the kube-system namespace has restarted.
+func HasResourceRestarted(label string) (bool, error) {
+	// magic number
+	wait := 5
+
+	for {
+		hasRestarted := false
+		restartCount, err := Kubectl(fmt.Sprintf("-n kube-system get pods -l %s -ojsonpath='{.items[*].status.containerStatuses[0].restartCount}'", label))
+		if err != nil {
+			return false, err
+		}
+		individualCount := strings.Split(restartCount, " ")
+		for _, count := range individualCount {
+			if count != "0" {
+				hasRestarted = true
+			}
+		}
+
+		if hasRestarted {
+			break
+		}
+		time.Sleep(time.Second)
+		wait--
+		if wait == 0 {
+			return false, nil
+		}
+	}
+
+	return true, nil
+}
+
+// FetchDockerContainerID fetches the docker container ID from the container name
+func FetchDockerContainerID(containerName string) (string, error) {
+	containerID, err := exec.Command("sh", "-c", fmt.Sprintf("docker ps -aqf \"name=%s\"", containerName)).CombinedOutput()
 	if err != nil {
-		return false, err
+		return "", errors.New("error executing docker command to fetch container ID")
 	}
 
-	if !strings.Contains(restartCount, "0") {
-		return true, nil
+	if containerID == nil {
+		return "", errors.New("no containerID found")
 	}
 
-	return false, nil
+	return strings.TrimSpace(string(containerID)), nil
 }
 
 // Kubectl executes the kubectl command with the given arguments
@@ -459,5 +490,7 @@ data:
 example.net.          IN      SOA     ns.example.net. admin.example.net. 2015082541 7200 3600 1209600 3600
 example.net. IN A 13.14.15.16
 `
-	clientName = "coredns-test-client"
+	clientName     = "coredns-test-client"
+	CoreDNSLabel   = "k8s-app=kube-dns"
+	APIServerLabel = "component=kube-apiserver"
 )
