@@ -281,9 +281,13 @@ func HasResourceRestarted(label string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		if !strings.Contains(restartCount, "0") {
-			break
+		individualCount := strings.Split(restartCount, " ")
+		for _, count := range individualCount {
+			if count == "0" {
+				break
+			}
 		}
+
 		time.Sleep(time.Second)
 		wait--
 		if wait == 0 {
