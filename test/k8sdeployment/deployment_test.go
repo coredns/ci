@@ -119,6 +119,49 @@ func TestKubernetesDeploymentHealthy(t *testing.T) {
 	})
 }
 
+func TestKubernetesDeploymentReady(t *testing.T) {
+	t.Run("Verify_coredns_ready", func(t *testing.T) {
+		timeout := time.Second * time.Duration(90)
+
+		containerID, err := kubernetes.FetchDockerContainerID("kind-control-plane")
+		if err != nil {
+			t.Fatalf("docker container ID not found, err: %s", err)
+		}
+
+		ips, err := kubernetes.CoreDNSPodIPs()
+		if err != nil {
+			t.Errorf("could not get coredns pod ips: %v", err)
+		}
+		if len(ips) != 1 {
+			t.Errorf("Expected 1 pod ip, found: %v", len(ips))
+		}
+
+		for _, ip := range ips {
+			start := time.Now()
+			for {
+				cmd := fmt.Sprintf("docker exec -i %s /bin/sh -c \"curl http://%s:8181/ready\"", containerID, ip)
+				resp, err := exec.Command("sh", "-c", cmd).CombinedOutput()
+				if err != nil {
+					t.Logf("pod (%v) ready check error %v", ip, err)
+					time.Sleep(time.Second)
+					continue
+				}
+
+				if strings.Contains(string(resp), "OK") {
+					// success
+					break
+				}
+
+				if time.Since(start) >= timeout {
+					t.Errorf("pod (%v) was not ready in %v", ip, timeout)
+					break
+				}
+				time.Sleep(time.Second)
+			}
+		}
+	})
+}
+
 func TestKubernetesDeploymentMetrics(t *testing.T) {
 	t.Run("Verify_metrics_available", func(t *testing.T) {
 
