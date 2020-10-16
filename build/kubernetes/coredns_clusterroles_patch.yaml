@@ -7,3 +7,6 @@ rules:
       - services
       - pods
       - namespaces
+    verbs:
+      - list
+      - watch

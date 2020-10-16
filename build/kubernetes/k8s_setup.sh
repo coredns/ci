@@ -24,7 +24,7 @@ kubectl patch deployment coredns -n kube-system -p "$(cat ~/go/src/${CIRCLE_PROJ
 
 # Patch CoreDNS clusterRoles to allow list/watch of EndpointSlice.
 # Remove this once EndpointSlice is part of the default CoreDNS clusterRoles.
-kubectl patch clusterroles system:coredns -n kube-system -p "$(cat ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/build/kubernetes/coredns_clusterroles_patch.yaml)"
+kubectl patch clusterroles system:coredns -n kube-system -p '$(cat ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/build/kubernetes/coredns_clusterroles_patch.yaml)'
 
 # Deploy test objects
 kubectl create -f ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/build/kubernetes/dns-test.yaml
