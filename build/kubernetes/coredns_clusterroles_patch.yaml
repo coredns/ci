@@ -3,7 +3,7 @@ rules:
       - ""
     resources:
       - endpoints
-      - endpointslice
+      - endpointslices
       - services
       - pods
       - namespaces
