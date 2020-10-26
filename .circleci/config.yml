@@ -81,8 +81,6 @@ executors:
 
 jobs:
   coredns-benchmark-tests:
-    environment:
-      - K8S_VERSION: v1.19.1
     executor: default-executor
     steps:
       - initworkingdir
