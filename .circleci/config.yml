@@ -1,83 +1,94 @@
 version: 2.1
 
-initWorkingDir: &initWorkingDir
-  type: shell
-  name: Initialize Working Directory
-  pwd: /
-  command: |
-    mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
-    sudo chown -R circleci ~/go
-    mkdir -p ~/go/out/tests
-    mkdir -p ~/go/out/logs
-    mkdir -p /home/circleci/logs
-    GOROOT=$(go env GOROOT)
-    sudo rm -r $(go env GOROOT)
-    sudo mkdir $GOROOT
-    LATEST=$(curl -s https://golang.org/VERSION?m=text)
-    curl https://dl.google.com/go/${LATEST}.linux-amd64.tar.gz | sudo tar xz -C $GOROOT --strip-components=1
+commands:
+  initworkingdir:
+    steps:
+      - run:
+          name: Init Dir
+          command: |
+            mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
+            sudo chown -R circleci ~/go
+            mkdir -p ~/go/out/tests
+            mkdir -p ~/go/out/logs
+            mkdir -p /home/circleci/logs
+            GOROOT=$(go env GOROOT)
+            sudo rm -r $(go env GOROOT)
+            sudo mkdir $GOROOT
+            LATEST=$(curl -s https://golang.org/VERSION?m=text)
+            curl https://dl.google.com/go/${LATEST}.linux-amd64.tar.gz | sudo tar xz -C $GOROOT --strip-components=1
 
-integrationDefaults: &integrationDefaults
-  machine:
-    image: ubuntu-1604:201903-01
-  working_directory: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
-  environment:
-    - K8S_VERSION: 1.19.1
-    - KIND_VERSION: v0.9.0
-    - KUBECONFIG: /home/circleci/.kube/kind-config-kind
+  setupkubernetes:
+    steps:
+      - run:
+          name: Setup Kubernetes
+          command: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/build/kubernetes/k8s_setup.sh
 
-setupKubernetes: &setupKubernetes
-    - run:
-        name: Setup Kubernetes
-        command: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/build/kubernetes/k8s_setup.sh
+  buildcorednsimage:
+    steps:
+      - run:
+          name: Build latest CoreDNS Docker image
+          command: |
+            mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
+            git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
+            cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
+            make coredns SYSTEM="GOOS=linux" && \
+            docker build -t coredns . && \
+            kind load docker-image coredns
 
-buildCoreDNSImage: &buildCoreDNSImage
-    - run:
-        name: Build latest CoreDNS Docker image
-        command: |
-          mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
-          git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
-          cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
-          make coredns SYSTEM="GOOS=linux" && \
-          docker build -t coredns . && \
-          kind load docker-image coredns
+  buildkubernetaiimage:
+    steps:
+      - run:
+          name: Build latest CoreDNS+Kubernetai Docker image
+          command: |
+            mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/kubernetai
+            git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/kubernetai ~/go/src/${CIRCLE_PROJECT_USERNAME}/kubernetai
 
-buildKubernetaiImage: &buildKubernetaiImage
-  - run:
-      name: Build latest CoreDNS+Kubernetai Docker image
-      command: |
-        mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/kubernetai
-        git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/kubernetai ~/go/src/${CIRCLE_PROJECT_USERNAME}/kubernetai
+            cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/kubernetai
+            GO111MODULE=on go get -v -d
+            make coredns SYSTEM="GOOS=linux" && \
+            mv ./coredns ../coredns/
+            cd ../coredns/
 
-        cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/kubernetai
-        GO111MODULE=on go get -v -d
-        make coredns SYSTEM="GOOS=linux" && \
-        mv ./coredns ../coredns/
-        cd ../coredns/
+            docker build -t coredns .
+            kind load docker-image coredns
 
-        docker build -t coredns .
-        kind load docker-image coredns
+  buildmetadataedns0image:
+    steps:
+      - run:
+          name: Build latest CoreDNS+metadata_edns0 Docker image
+          command: |
+            mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/metadata_edns0
+            git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/metadata_edns0 ~/go/src/${CIRCLE_PROJECT_USERNAME}/metadata_edns0
 
-buildMetadataEdns0Image: &buildMetadataEdns0Image
-  - run:
-      name: Build latest CoreDNS+metadata_edns0 Docker image
-      command: |
-        mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/metadata_edns0
-        git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/metadata_edns0 ~/go/src/${CIRCLE_PROJECT_USERNAME}/metadata_edns0
+            cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/metadata_edns0
+            GO111MODULE=on go get -v -d
+            make coredns SYSTEM="GOOS=linux" && \
+            mv ./coredns ../coredns/
+            cd ../coredns/
 
-        cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/metadata_edns0
-        GO111MODULE=on go get -v -d
-        make coredns SYSTEM="GOOS=linux" && \
-        mv ./coredns ../coredns/
-        cd ../coredns/
+            docker build -t coredns .
+            kind load docker-image coredns
 
-        docker build -t coredns .
-        kind load docker-image coredns
+executors:
+  default-executor:
+    parameters:
+      k8s-version:
+        type: string
+        default: 1.19.1
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
+    environment:
+      - K8S_VERSION: <<parameters.k8s-version>>
+      - KIND_VERSION: v0.9.0
+      - KUBECONFIG: /home/circleci/.kube/kind-config-kind
+
 
 jobs:
   coredns-benchmark-tests:
-    <<: *integrationDefaults
+    executor: default-executor
     steps:
-      - <<: *initWorkingDir
+      - initworkingdir
       - checkout
       - run:
           name: Clone CoreDNS repo
@@ -92,27 +103,26 @@ jobs:
   kubernetes-tests:
     parameters:
       k8s-version:
-        type: env_var_name
+        type: string
         default: 1.19.1
-    <<: *integrationDefaults
-    environment:
-      - K8S_VERSION: << parameters.k8s-version >>
+    executor:
+      name: default-executor
     steps:
-      - <<: *initWorkingDir
+      - initworkingdir
       - checkout
-      - <<: *setupKubernetes
-      - <<: *buildCoreDNSImage
+      - setupkubernetes
+      - buildcorednsimage
       - run:
           name: Run Kubernetes tests
           command: |
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/kubernetes
             GO111MODULE=on go test -v ./...
   k8s-deployment-tests:
-    <<: *integrationDefaults
+    executor: default-executor
     steps:
-      - <<: *initWorkingDir
+      - initworkingdir
       - checkout
-      - <<: *setupKubernetes
+      - setupkubernetes
       - run:
           name: Run Kubernetes deployment tests
           command: |
@@ -123,23 +133,23 @@ jobs:
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/k8sdeployment
             GO111MODULE=on go test -v ./...
   external-plugin-tests:
-    <<: *integrationDefaults
+    executor: default-executor
     steps:
-      - <<: *initWorkingDir
+      - initworkingdir
       - checkout
-      - <<: *setupKubernetes
+      - setupkubernetes
       - run:
           name: Clone CoreDNS repo
           command: |
             mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
             git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
-      - <<: *buildKubernetaiImage
+      - buildkubernetaiimage
       - run:
           name: Run Kubernetai plugin tests
           command: |
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/kubernetai
             GO111MODULE=on go test -v ./...
-      - <<: *buildMetadataEdns0Image
+      - buildmetadataedns0image
       - run:
           name: Run metadata_edns0 plugin tests
           command: |
@@ -155,4 +165,7 @@ workflows:
       - kubernetes-tests:
           matrix:
             parameters:
-              k8s-version: ["1.19.1", "1.18.8", "1.17.11"]
+              k8s-version:
+                - 1.19.1
+                - 1.18.8
+                - 1.17.11
