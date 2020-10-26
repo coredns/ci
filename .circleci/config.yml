@@ -71,21 +71,18 @@ commands:
 
 executors:
   default-executor:
-    parameters:
-      k8s-version:
-        type: string
-        default: v1.19.1
     machine:
       image: ubuntu-1604:201903-01
     working_directory: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
     environment:
-      - K8S_VERSION: <<parameters.k8s-version>>
       - KIND_VERSION: v0.9.0
       - KUBECONFIG: /home/circleci/.kube/kind-config-kind
 
 
 jobs:
   coredns-benchmark-tests:
+    environment:
+      - K8S_VERSION: v1.19.1
     executor: default-executor
     steps:
       - initworkingdir
@@ -104,6 +101,8 @@ jobs:
     parameters:
       k8s-version:
         type: string
+    environment:
+      - K8S_VERSION: <<parameters.k8s-version>>
     executor:
       name: default-executor
     steps:
@@ -117,6 +116,8 @@ jobs:
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/kubernetes
             GO111MODULE=on go test -v ./...
   k8s-deployment-tests:
+    environment:
+      - K8S_VERSION: v1.19.1
     executor: default-executor
     steps:
       - initworkingdir
@@ -132,6 +133,8 @@ jobs:
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/k8sdeployment
             GO111MODULE=on go test -v ./...
   external-plugin-tests:
+    environment:
+      - K8S_VERSION: v1.19.1
     executor: default-executor
     steps:
       - initworkingdir
