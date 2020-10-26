@@ -152,7 +152,7 @@ workflows:
       - coredns-benchmark-tests
       - k8s-deployment-tests
       - external-plugin-tests
-      - kubernetes-tests
+      - kubernetes-tests:
           matrix:
             parameters:
-              k8s-version: [ "1.19.1", "1.18.8", "1.17.11" ]
+              k8s-version: ["1.19.1", "1.18.8", "1.17.11"]
