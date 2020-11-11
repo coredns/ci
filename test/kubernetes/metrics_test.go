@@ -21,8 +21,7 @@ const namespace = "testns"
 
 func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
 
-	//var kubeconfig = "/home/circleci/.kube/kind-config-kind"
-	var kubeconfig = "/Users/cohaver/.kube/kind-config-kind"
+	var kubeconfig = "/home/circleci/.kube/kind-config-kind"
 
 	flag.Parse()
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
