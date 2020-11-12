@@ -21,6 +21,19 @@ import (
 const namespace = "testns"
 
 func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
+	corefile := `    .:53 {
+        health
+        ready
+        errors
+		prometheus :5193
+        kubernetes cluster.local
+    }
+`
+	err := LoadCorefile(corefile)
+	if err != nil {
+		t.Fatalf("Could not load corefile: %s", err)
+	}
+
 	config, err := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
 	if err != nil {
 		panic(err)
