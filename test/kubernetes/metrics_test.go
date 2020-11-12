@@ -252,7 +252,6 @@ func scrapeMetrics(t *testing.T) []byte {
 
 	ip := ips[0]
 	cmd := fmt.Sprintf("docker exec -i %s /bin/sh -c \"curl -s http://%s:9153/metrics\"", containerID, ip)
-	println("DEBUG: " + cmd)
 	mf, err := exec.Command("sh", "-c", cmd).CombinedOutput()
 	if err != nil {
 		t.Errorf("error while trying to run command in docker container: %s %v", err, mf)
