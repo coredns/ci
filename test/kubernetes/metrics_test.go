@@ -2,9 +2,10 @@ package kubernetes
 
 import (
 	"context"
-	"flag"
 	"fmt"
+	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -20,11 +21,7 @@ import (
 const namespace = "testns"
 
 func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
-
-	var kubeconfig = "/home/circleci/.kube/kind-config-kind"
-
-	flag.Parse()
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
 	if err != nil {
 		panic(err)
 	}
@@ -33,20 +30,6 @@ func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
 		panic(err)
 	}
 
-	endpoints1 := []discovery.Endpoint{{
-		Addresses: []string{"1.2.3.4"},
-	}}
-	endpoints2 := []discovery.Endpoint{{
-		Addresses: []string{"1.2.3.5"},
-	}}
-	subset1 := []api.EndpointSubset{{
-		Addresses: []api.EndpointAddress{{IP: "1.2.3.6", Hostname: "foo"}},
-		Ports:     []api.EndpointPort{{Port: 80, Name: "http"}},
-	}}
-	subset2 := []api.EndpointSubset{{
-		Addresses: []api.EndpointAddress{{IP: "1.2.3.7", Hostname: "foo"}},
-	}}
-
 	defer client.CoreV1().Namespaces().Delete(context.TODO(), namespace, meta.DeleteOptions{})
 	if _, err := client.CoreV1().Namespaces().Create(context.TODO(), &api.Namespace{
 		ObjectMeta: meta.ObjectMeta{Name: namespace},
@@ -54,6 +37,18 @@ func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Create Services
+	createService(t, client, "my-service", api.ClusterIPNone)
+	createService(t, client, "clusterip-service", "10.96.99.12")
+	createService(t, client, "headless-no-annotation", api.ClusterIPNone)
+	createService(t, client, "headless-wrong-annotation", api.ClusterIPNone)
+
+	// test endpoints and endpointslice
+	t.Run("EndpointSlice", func(t *testing.T) { testEndpoints(t, client, true) })
+	t.Run("Endpoint", func(t *testing.T) { testEndpoints(t, client, false) })
+}
+
+func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 	// scrape and parse metrics to get base state
 	m := scrapeMetrics(t)
 	var tp expfmt.TextParser
@@ -62,30 +57,14 @@ func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
 		t.Fatalf("Could not parse scraped metrics: %v", err)
 	}
 
-	now := time.Now()
-
-	createService(t, client, "my-service", api.ClusterIPNone)
-	createEndpointSlice(t, client, "my-service", now.Add(-132*time.Second), endpoints1)
-	updateEndpointSlice(t, client, "my-service", now.Add(-66*time.Second), endpoints2)
-	createEndpoints(t, client, "my-service", now.Add(-132*time.Second), subset1)
-	updateEndpoints(t, client, "my-service", now.Add(-66*time.Second), subset2)
-
-	createEndpointSlice(t, client, "endpoints-no-service", now.Add(-4*time.Second), nil)
-	createEndpoints(t, client, "endpoints-no-service", now.Add(-4*time.Second), nil)
-
-	createService(t, client, "clusterip-service", "10.96.99.12")
-	createEndpointSlice(t, client, "clusterip-service", now.Add(-8*time.Second), nil)
-	createEndpoints(t, client, "clusterip-service", now.Add(-8*time.Second), nil)
-
-	createService(t, client, "headless-no-annotation", api.ClusterIPNone)
-	createEndpointSlice(t, client, "headless-no-annotation", nil, nil)
-	createEndpoints(t, client, "headless-no-annotation", nil, nil)
-
-	createService(t, client, "headless-wrong-annotation", api.ClusterIPNone)
-	createEndpointSlice(t, client, "headless-wrong-annotation", "wrong-value", nil)
-	createEndpoints(t, client, "headless-wrong-annotation", "wrong-value", nil)
+	if slices {
+		addUpdateEndpointSlice(t, client)
+	} else {
+		addUpdateEndpoints(t, client)
+	}
 
 	// give time for coredns to receive and process the events
+	// and slice mirroring to occur
 	time.Sleep(time.Second)
 
 	// prepare expected values
@@ -99,10 +78,18 @@ func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
 	// expectBucketsDelta holds the expected deltas in bucket counts after
 	// the creates/updates in above tests
 	expectBucketsDelta := map[int]uint64{
-		17: 2, // update for 1 endpoint and 1 slice
-		18: 4, // create for 1 endpoint and 1 slice, plus previous bucket
-		19: 4, // nothing new in bigger buckets
-		20: 4,
+		17: 1, // update for 1 endpoint/slice
+		18: 2, // create for 1 endpoint/slice, plus previous bucket
+		19: 2, // nothing new in bigger buckets
+		20: 2,
+	}
+	sv, _ := client.ServerVersion()
+	major, _ := strconv.Atoi(sv.Major)
+	minor, _ := strconv.Atoi(sv.Minor)
+	if slices && major <= 1 && minor <= 18 {
+		// CoreDNS does not watch endpointslices on k8s <= 1.18,
+		// so expect to see no delta in histogram
+		expectBucketsDelta = map[int]uint64{}
 	}
 
 	// create the expected bucket values by adding deltas to the base state buckets
@@ -128,6 +115,37 @@ func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
 			t.Errorf("In bucket %v, expected %v, got %v", eb.n, eb.count, count)
 		}
 	}
+}
+
+func addUpdateEndpoints(t *testing.T, client *kubernetes.Clientset) {
+	subset1 := []api.EndpointSubset{{
+		Addresses: []api.EndpointAddress{{IP: "1.2.3.6", Hostname: "foo"}},
+		Ports:     []api.EndpointPort{{Port: 80, Name: "http"}},
+	}}
+	subset2 := []api.EndpointSubset{{
+		Addresses: []api.EndpointAddress{{IP: "1.2.3.7", Hostname: "foo"}},
+	}}
+	createEndpoints(t, client, "my-service", time.Now().Add(-132*time.Second), subset1)
+	updateEndpoints(t, client, "my-service", time.Now().Add(-66*time.Second), subset2)
+	createEndpoints(t, client, "endpoints-no-service", time.Now().Add(-4*time.Second), nil)
+	createEndpoints(t, client, "clusterip-service", time.Now().Add(-8*time.Second), nil)
+	createEndpoints(t, client, "headless-no-annotation", nil, nil)
+	createEndpoints(t, client, "headless-wrong-annotation", "wrong-value", nil)
+}
+
+func addUpdateEndpointSlice(t *testing.T, client *kubernetes.Clientset) {
+	endpoints1 := []discovery.Endpoint{{
+		Addresses: []string{"1.2.3.4"},
+	}}
+	endpoints2 := []discovery.Endpoint{{
+		Addresses: []string{"1.2.3.5"},
+	}}
+	createEndpointSlice(t, client, "my-service", time.Now().Add(-132*time.Second), endpoints1)
+	updateEndpointSlice(t, client, "my-service", time.Now().Add(-66*time.Second), endpoints2)
+	createEndpointSlice(t, client, "endpoints-no-service", time.Now().Add(-4*time.Second), nil)
+	createEndpointSlice(t, client, "clusterip-service", time.Now().Add(-8*time.Second), nil)
+	createEndpointSlice(t, client, "headless-no-annotation", nil, nil)
+	createEndpointSlice(t, client, "headless-wrong-annotation", "wrong-value", nil)
 }
 
 func buildEndpoints(name string, lastChangeTriggerTime interface{}, subsets []api.EndpointSubset) *api.Endpoints {
@@ -223,7 +241,7 @@ func scrapeMetrics(t *testing.T) []byte {
 	cmd := fmt.Sprintf("docker exec -i %s /bin/sh -c \"curl -s http://%s:9153/metrics\"", containerID, ip)
 	mf, err := exec.Command("sh", "-c", cmd).CombinedOutput()
 	if err != nil {
-		t.Errorf("error while trying to run command in docker container: %s", err)
+		t.Errorf("error while trying to run command in docker container: %s %v", err, mf)
 	}
 	if len(mf) == 0 {
 		t.Errorf("unable to scrape metrics from %v", ip)
