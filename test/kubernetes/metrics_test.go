@@ -25,7 +25,7 @@ func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
         health
         ready
         errors
-		prometheus :5193
+		prometheus :9153
         kubernetes cluster.local
     }
 `
