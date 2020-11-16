@@ -2,9 +2,7 @@ package kubernetes
 
 import (
 	"context"
-	"fmt"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"testing"
@@ -63,7 +61,7 @@ func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
 
 func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 	// scrape and parse metrics to get base state
-	m := scrapeMetrics(t)
+	m := ScrapeMetrics(t)
 	var tp expfmt.TextParser
 	base, err := tp.TextToMetricFamilies(strings.NewReader(string(m)))
 	if err != nil {
@@ -113,7 +111,7 @@ func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 	}
 
 	// scrape metrics and validate results
-	m = scrapeMetrics(t)
+	m = ScrapeMetrics(t)
 	got, err := tp.TextToMetricFamilies(strings.NewReader(string(m)))
 	if err != nil {
 		t.Fatalf("Could not parse scraped metrics: %v", err)
@@ -234,30 +232,4 @@ func createService(t *testing.T, client kubernetes.Interface, name string, clust
 	}, meta.CreateOptions{}); err != nil {
 		t.Fatal(err)
 	}
-}
-
-func scrapeMetrics(t *testing.T) []byte {
-	containerID, err := FetchDockerContainerID("kind-control-plane")
-	if err != nil {
-		t.Fatalf("docker container ID not found, err: %s", err)
-	}
-
-	ips, err := CoreDNSPodIPs()
-	if err != nil {
-		t.Errorf("could not get coredns pod ip: %v", err)
-	}
-	if len(ips) != 1 {
-		t.Errorf("expected 1 pod ip, found: %v", len(ips))
-	}
-
-	ip := ips[0]
-	cmd := fmt.Sprintf("docker exec -i %s /bin/sh -c \"curl -s http://%s:9153/metrics\"", containerID, ip)
-	mf, err := exec.Command("sh", "-c", cmd).CombinedOutput()
-	if err != nil {
-		t.Errorf("error while trying to run command in docker container: %s %v", err, mf)
-	}
-	if len(mf) == 0 {
-		t.Errorf("unable to scrape metrics from %v", ip)
-	}
-	return mf
 }
