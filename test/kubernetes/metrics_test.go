@@ -60,6 +60,21 @@ func TestDNSProgrammingLatencyEndpoints(t *testing.T) {
 }
 
 func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
+
+	sv, _ := client.ServerVersion()
+	major, _ := strconv.Atoi(sv.Major)
+	minor, _ := strconv.Atoi(sv.Minor)
+
+	if !slices && major >= 1 && minor >= 19 {
+		// Skip tests for Endpoints if we are monitoring EndpointSlices (>= k8s 1.19).
+		// Endpoint should be copied to EndpointSlices via the K8s EndpointSliceMirror
+		// Controller. However, it may be unpredictably slow in the CI VMs and result
+		// in flaky testing, or slow tests if we wait for it to complete.  We are already testing
+		// EndpointSlices directly, so there is little value to testing Endpoints here.
+		t.Skip("skipping for K8s verions >= 1.19")
+		return
+	}
+
 	// scrape and parse metrics to get base state
 	m := ScrapeMetrics(t)
 	var tp expfmt.TextParser
@@ -75,7 +90,6 @@ func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 	}
 
 	// give time for coredns to receive and process the events
-	// and slice mirroring to occur
 	time.Sleep(time.Second)
 
 	// prepare expected values
@@ -94,9 +108,6 @@ func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 		19: 2, // nothing new in bigger buckets
 		20: 2,
 	}
-	sv, _ := client.ServerVersion()
-	major, _ := strconv.Atoi(sv.Major)
-	minor, _ := strconv.Atoi(sv.Minor)
 	if slices && major <= 1 && minor <= 18 {
 		// CoreDNS does not watch endpointslices on k8s <= 1.18,
 		// so expect to see no delta in histogram
