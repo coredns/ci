@@ -316,6 +316,32 @@ func FetchDockerContainerID(containerName string) (string, error) {
 	return strings.TrimSpace(string(containerID)), nil
 }
 
+func ScrapeMetrics(t *testing.T) []byte {
+	containerID, err := FetchDockerContainerID("kind-control-plane")
+	if err != nil {
+		t.Fatalf("docker container ID not found, err: %s", err)
+	}
+
+	ips, err := CoreDNSPodIPs()
+	if err != nil {
+		t.Errorf("could not get coredns pod ip: %v", err)
+	}
+	if len(ips) != 1 {
+		t.Errorf("expected 1 pod ip, found: %v", len(ips))
+	}
+
+	ip := ips[0]
+	cmd := fmt.Sprintf("docker exec -i %s /bin/sh -c \"curl -s http://%s:9153/metrics\"", containerID, ip)
+	mf, err := exec.Command("sh", "-c", cmd).CombinedOutput()
+	if err != nil {
+		t.Errorf("error while trying to run command in docker container: %s %v", err, mf)
+	}
+	if len(mf) == 0 {
+		t.Errorf("unable to scrape metrics from %v", ip)
+	}
+	return mf
+}
+
 // Kubectl executes the kubectl command with the given arguments
 func Kubectl(args string) (result string, err error) {
 	kctl := os.Getenv("KUBECTL")

@@ -164,29 +164,9 @@ func TestKubernetesDeploymentReady(t *testing.T) {
 
 func TestKubernetesDeploymentMetrics(t *testing.T) {
 	t.Run("Verify_metrics_available", func(t *testing.T) {
-
-		containerID, err := kubernetes.FetchDockerContainerID("kind-control-plane")
-		if err != nil {
-			t.Fatalf("docker container ID not found, err: %s", err)
-		}
-
-		ips, err := kubernetes.CoreDNSPodIPs()
-		if err != nil {
-			t.Errorf("could not get coredns pod ips: %v", err)
-		}
-		if len(ips) != 1 {
-			t.Errorf("Expected 1 pod ip, found: %v", len(ips))
-		}
-
-		for _, ip := range ips {
-			cmd := fmt.Sprintf("docker exec -i %s /bin/sh -c \"curl http://%s:9153/metrics\"", containerID, ip)
-			mf, err := exec.Command("sh", "-c", cmd).CombinedOutput()
-			if err != nil {
-				t.Errorf("error while trying to run command in docker container: %s", err)
-			}
-			if len(mf) == 0 {
-				t.Errorf("unable to scrape metrics from %v", ip)
-			}
+		mf := kubernetes.ScrapeMetrics(t)
+		if len(mf) == 0 {
+			t.Error("unable to scrape metrics")
 		}
 	})
 }
