@@ -71,7 +71,13 @@ func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 		// Controller. However, it may be unpredictably slow in the CI VMs and result
 		// in flaky testing, or slow tests if we wait for it to complete.  We are already testing
 		// EndpointSlices directly, so there is little value to testing Endpoints here.
-		t.Skip("skipping for K8s verions >= 1.19")
+		t.Skip("skipping for K8s versions >= 1.19")
+		return
+	}
+
+	if slices && major <= 1 && minor < 19 {
+		// Skip tests for EndpointSlices for k8s versions less that 1.19
+		t.Skip("skipping for K8s versions < 1.19")
 		return
 	}
 
