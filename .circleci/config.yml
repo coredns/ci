@@ -130,6 +130,7 @@ jobs:
             mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
             git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/k8sdeployment
+            go mod download
             GO111MODULE=on go test -v ./...
   external-plugin-tests:
     environment:
@@ -149,12 +150,14 @@ jobs:
           name: Run Kubernetai plugin tests
           command: |
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/kubernetai
+            go mod download
             GO111MODULE=on go test -v ./...
       - buildmetadataedns0image
       - run:
           name: Run metadata_edns0 plugin tests
           command: |
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/metadata_edns0
+            go mod download
             GO111MODULE=on go test -v ./...
 
 workflows:
