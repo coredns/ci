@@ -77,6 +77,30 @@ spec:
           name: c-port
           protocol: UDP
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unready
+  namespace: test-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-unready
+  template:
+    metadata:
+      labels:
+        app: app-unready
+    spec:
+      containers:
+        - name: app-unready
+          image: invalid-image:0.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 1234
+              name: c-port
+              protocol: UDP
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -161,6 +185,20 @@ spec:
   - name: c-port
     port: 1234
     protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-unready
+  namespace: test-1
+spec:
+  selector:
+    app: app-unready
+  clusterIP: None
+  ports:
+    - name: c-port
+      port: 1234
+      protocol: UDP
 ---
 kind: Endpoints
 apiVersion: v1
