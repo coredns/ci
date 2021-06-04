@@ -72,10 +72,10 @@ commands:
 executors:
   default-executor:
     machine:
-      image: ubuntu-1604:201903-01
+      image: ubuntu-2004:202104-01
     working_directory: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
     environment:
-      - KIND_VERSION: v0.10.0
+      - KIND_VERSION: v0.11.1
       - KUBECONFIG: /home/circleci/.kube/kind-config-kind
 
 
@@ -112,11 +112,11 @@ jobs:
           name: Run Kubernetes tests
           command: |
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/kubernetes
-            go mod download
+            go mod tidy
             GO111MODULE=on go test -v ./...
   k8s-deployment-tests:
     environment:
-      - K8S_VERSION: v1.20.2
+      - K8S_VERSION: v1.21.1
     executor: default-executor
     steps:
       - initworkingdir
@@ -130,11 +130,11 @@ jobs:
             mkdir -p ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
             git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/k8sdeployment
-            go mod download
+            go mod tidy
             GO111MODULE=on go test -v ./...
   external-plugin-tests:
     environment:
-      - K8S_VERSION: v1.20.2
+      - K8S_VERSION: v1.21.1
     executor: default-executor
     steps:
       - initworkingdir
@@ -150,14 +150,14 @@ jobs:
           name: Run Kubernetai plugin tests
           command: |
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/kubernetai
-            go mod download
+            go mod tidy
             GO111MODULE=on go test -v ./...
       - buildmetadataedns0image
       - run:
           name: Run metadata_edns0 plugin tests
           command: |
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci/test/metadata_edns0
-            go mod download
+            go mod tidy
             GO111MODULE=on go test -v ./...
 
 workflows:
@@ -169,4 +169,4 @@ workflows:
       - kubernetes-tests:
           matrix:
             parameters:
-              k8s-version: ["v1.20.2", "v1.19.7", "v1.18.15"]
+              k8s-version: ["v1.21.1", "v1.20.7", "v1.19.11"]
