@@ -99,7 +99,7 @@ var dnsTestCasesA = []test.Case{
 	{ // An NS type query
 		Qname: "cluster.local.", Qtype: dns.TypeNS,
 		Rcode: dns.RcodeSuccess,
-		Ns: []dns.RR{
+		Answer: []dns.RR{
 			test.NS("cluster.local.	5	IN	NS	kube-dns.kube-system.svc.cluster.local."),
 		},
 		Extra: []dns.RR{
