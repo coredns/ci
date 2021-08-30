@@ -96,7 +96,7 @@ var dnsTestCasesA = []test.Case{
 			test.SOA("cluster.local.        303     IN      SOA     ns.dns.cluster.local. hostmaster.cluster.local. 1499347823 7200 1800 86400 30"),
 		},
 	},
-	{ // NS query
+	{ // An NS type query
 		Qname: "cluster.local.", Qtype: dns.TypeNS,
 		Rcode: dns.RcodeSuccess,
 		Ns: []dns.RR{
