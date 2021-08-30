@@ -94,7 +94,7 @@ jobs:
           name: Run CoreDNS Benchmarks
           command: |
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
-            go test -v -bench=.  ./...
+            go test -v -bench=.  ./... -run=^Benchmark
   kubernetes-tests:
     parameters:
       k8s-version:
