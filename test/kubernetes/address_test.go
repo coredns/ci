@@ -96,6 +96,16 @@ var dnsTestCasesA = []test.Case{
 			test.SOA("cluster.local.        303     IN      SOA     ns.dns.cluster.local. hostmaster.cluster.local. 1499347823 7200 1800 86400 30"),
 		},
 	},
+	{ // An NS type query
+		Qname: "cluster.local.", Qtype: dns.TypeNS,
+		Rcode: dns.RcodeSuccess,
+		Answer: []dns.RR{
+			test.NS("cluster.local.	5	IN	NS	kube-dns.kube-system.svc.cluster.local."),
+		},
+		Extra: []dns.RR{
+			test.A("kube-dns.kube-system.svc.cluster.local. 5 IN A 10.96.0.10"),
+		},
+	},
 }
 
 var newObjectTests = []test.Case{
