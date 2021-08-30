@@ -100,7 +100,10 @@ var dnsTestCasesA = []test.Case{
 		Qname: "cluster.local.", Qtype: dns.TypeNS,
 		Rcode: dns.RcodeSuccess,
 		Ns: []dns.RR{
-				test.NS("cluster.local.	5	IN	NS	ns.dns.cluster.local."),
+			test.NS("cluster.local.	5	IN	NS	kube-dns.kube-system.svc.cluster.local."),
+		},
+		Extra: []dns.RR{
+			test.A("kube-dns.kube-system.svc.cluster.local. 5 IN A 10.96.0.10"),
 		},
 	},
 }
