@@ -164,12 +164,12 @@ func locaIP() net.IP {
 
 // LoadCorefile calls loadCorefileAndZonefile without a zone file
 func LoadCorefile(corefile string) error {
-	return LoadCorefileAndZonefile(corefile, "")
+	return LoadCorefileAndZonefile(corefile, "", true)
 }
 
 // LoadCorefileAndZonefile constructs a configmap defining files for the corefile and zone,
-// forces the coredns pod to load the new configmap, and waits for the coredns pod to be ready.
-func LoadCorefileAndZonefile(corefile, zonefile string) error {
+// If restart is true, restarts the coredns pod to load the new configmap, and waits for the coredns pod to be ready.
+func LoadCorefileAndZonefile(corefile, zonefile string, restart bool) error {
 
 	// apply configmap yaml
 	yamlString := configmap + "\n"
@@ -186,10 +186,13 @@ func LoadCorefileAndZonefile(corefile, zonefile string) error {
 		return err
 	}
 
-	// force coredns pod reload the config
-	Kubectl("-n kube-system delete pods -l k8s-app=kube-dns")
+	if restart {
+		// force coredns pod reload the config
+		Kubectl("-n kube-system delete pods -l k8s-app=kube-dns")
 
-	return WaitReady(30)
+		return WaitReady(30)
+	}
+	return nil
 }
 
 func LoadKubednsConfigmap(stubdata, upstreamdata string) error {

@@ -69,7 +69,7 @@ func TestKubernetesFallthrough(t *testing.T) {
       forward . ` + udp + `
     }
 `
-	err := LoadCorefileAndZonefile(corefile, clusterLocal)
+	err := LoadCorefileAndZonefile(corefile, clusterLocal, true)
 	if err != nil {
 		t.Fatalf("Could not load corefile/zonefile: %s", err)
 	}
@@ -130,7 +130,7 @@ func TestKubernetesFallthroughFiltered(t *testing.T) {
       }
     }
 `
-	err := LoadCorefileAndZonefile(corefile, clusterLocal)
+	err := LoadCorefileAndZonefile(corefile, clusterLocal, true)
 	if err != nil {
 		t.Fatalf("Could not load corefile/zonefile: %s", err)
 	}
