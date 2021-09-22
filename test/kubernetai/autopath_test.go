@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/coredns/ci/test/kubernetes"
 	"github.com/coredns/coredns/plugin/test"
+
+	"github.com/coredns/ci/test/kubernetes"
 
 	"github.com/miekg/dns"
 )
@@ -113,7 +114,7 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
     foo.example.net.      IN      A	10.10.10.11
 
 `
-	err := kubernetes.LoadCorefileAndZonefile(corefile, exampleZonefile)
+	err := kubernetes.LoadCorefileAndZonefile(corefile, exampleZonefile, true)
 	if err != nil {
 		t.Fatalf("Could not load corefile/zonefile: %s", err)
 	}
