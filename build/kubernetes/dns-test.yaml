@@ -266,4 +266,83 @@ spec:
   - name: c-port
     port: 1234
     protocol: UDP
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-1
+  namespace: test-3
+spec:
+  selector:
+    app: headless-1
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-1
+  namespace: test-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: headless-1
+  template:
+    metadata:
+      labels:
+        app: headless-1
+    spec:
+      containers:
+        - name: test-pod-name
+          image: gcr.io/google_containers/pause-amd64:3.0
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-1
+  namespace: test-3
+spec:
+  selector:
+    app: headless-2
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-2
+  namespace: test-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: headless-2
+  template:
+    metadata:
+      labels:
+        app: headless-2
+    spec:
+      containers:
+        - name: test-pod-name-longer-than-63-characters-making-it-an-invalid-dns-label
+          image: gcr.io/google_containers/pause-amd64:3.0
+          ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
 
