@@ -286,28 +286,21 @@ spec:
       port: 80
       protocol: TCP
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: test-name
   namespace: test-3
+  labels:
+    app: headless-1
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: headless-1
-  template:
-    metadata:
-      labels:
-        app: headless-1
-    spec:
-      containers:
-        - name: pause
-          image: gcr.io/google_containers/pause-amd64:3.0
-          ports:
-            - containerPort: 80
-              name: http
-              protocol: TCP
+  containers:
+    - name: pause
+      image: gcr.io/google_containers/pause-amd64:3.0
+      ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
 ---
 apiVersion: v1
 kind: Service
@@ -323,26 +316,18 @@ spec:
       port: 80
       protocol: TCP
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: test-name-longer-than-63-characters-making-it-an-invalid-dns-label
   namespace: test-3
+  labels:
+    app: headless-2
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: headless-2
-  template:
-    metadata:
-      labels:
-        app: headless-2
-    spec:
-      containers:
-        - name: pause
-          image: gcr.io/google_containers/pause-amd64:3.0
-          ports:
-            - containerPort: 80
-              name: http
-              protocol: TCP
-
+  containers:
+    - name: pause
+      image: gcr.io/google_containers/pause-amd64:3.0
+      ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP

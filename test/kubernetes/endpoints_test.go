@@ -19,7 +19,7 @@ func TestKubernetesEndpointPodNames(t *testing.T) {
 			Case:        test.Case{Qname: "headless-1.test-3.svc.cluster.local.", Qtype: dns.TypeSRV, Rcode: dns.RcodeSuccess},
 			AnswerCount: 1,
 			ExtraCount:  1,
-			TargetRegEx: "^test-name-.+\\.headless-1\\.test-3\\.svc\\.cluster\\.local\\.$",
+			TargetRegEx: "^test-name\\.headless-1\\.test-3\\.svc\\.cluster\\.local\\.$",
 		},
 		{
 			Case:        test.Case{Qname: "headless-2.test-3.svc.cluster.local.", Qtype: dns.TypeSRV, Rcode: dns.RcodeSuccess},
