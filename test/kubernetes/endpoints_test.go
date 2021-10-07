@@ -26,7 +26,7 @@ func TestKubernetesEndpointPodNames(t *testing.T) {
 			AnswerCount: 1,
 			ExtraCount:  1,
 			// The pod name selected by headless-2 exceeds the valid dns label length, so it should fallback to the dashed-ip
-			TargetRegEx: "^[0-9]+-[0-9]+-[0-9]+-[0-9]+\\.headless-1\\.test-3\\.svc\\.cluster\\.local\\.$",
+			TargetRegEx: "^[0-9]+-[0-9]+-[0-9]+-[0-9]+\\.headless-2\\.test-3\\.svc\\.cluster\\.local\\.$",
 		},
 	}
 
