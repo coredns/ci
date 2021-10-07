@@ -289,7 +289,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-1
+  name: test-name
   namespace: test-3
 spec:
   replicas: 1
@@ -302,7 +302,7 @@ spec:
         app: headless-1
     spec:
       containers:
-        - name: test-pod-name
+        - name: pause
           image: gcr.io/google_containers/pause-amd64:3.0
           ports:
             - containerPort: 80
@@ -326,7 +326,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-2
+  name: test-name-longer-than-63-characters-making-it-an-invalid-dns-label
   namespace: test-3
 spec:
   replicas: 1
@@ -339,7 +339,7 @@ spec:
         app: headless-2
     spec:
       containers:
-        - name: test-pod-name-longer-than-63-characters-making-it-an-invalid-dns-label
+        - name: pause
           image: gcr.io/google_containers/pause-amd64:3.0
           ports:
             - containerPort: 80
