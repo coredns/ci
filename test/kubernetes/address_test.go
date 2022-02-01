@@ -40,33 +40,6 @@ var dnsTestCasesA = []test.Case{
 			test.SOA("cluster.local.	303	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1502313310 7200 1800 86400 60"),
 		},
 	},
-	{ // A service record search with a wild card namespace should return all (1) services in exposed namespaces
-		Qname: "svc-1-a.*.svc.cluster.local.", Qtype: dns.TypeA,
-		Rcode: dns.RcodeSuccess,
-		Answer: []dns.RR{
-			test.A("svc-1-a.*.svc.cluster.local.      303    IN      A       10.96.0.100"),
-		},
-	},
-	{ // A wild card service name in an exposed namespace should result in all records
-		Qname: "*.test-1.svc.cluster.local.", Qtype: dns.TypeA,
-		Rcode: dns.RcodeSuccess,
-		Answer: []dns.RR{
-			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.96.0.100"),
-			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.96.0.110"),
-			test.A("*.test-1.svc.cluster.local.      303    IN      A       10.96.0.115"),
-			test.A("*.test-1.svc.cluster.local.      303    IN      A       172.17.0.254"),
-			test.A("*.test-1.svc.cluster.local.      303    IN      A       172.17.0.255"),
-			test.CNAME("*.test-1.svc.cluster.local.  303    IN      CNAME   example.net."),
-			test.A("example.net.                     303    IN      A       13.14.15.16"),
-		},
-	},
-	{ // A wild card service name in an un-exposed namespace result in nxdomain
-		Qname: "*.test-2.svc.cluster.local.", Qtype: dns.TypeA,
-		Rcode: dns.RcodeNameError,
-		Ns: []dns.RR{
-			test.SOA("cluster.local.	303	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1502313310 7200 1800 86400 60"),
-		},
-	},
 	{ // By default, pod queries are disabled, so a pod query should return NXDOMAIN
 		Qname: "10-20-0-101.test-1.pod.cluster.local.", Qtype: dns.TypeA,
 		Rcode: dns.RcodeNameError,
