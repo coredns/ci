@@ -390,6 +390,10 @@ func parseDig(s *bufio.Scanner) (*dns.Msg, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = parseDigFlags(s, m)
+	if err != nil {
+		return nil, err
+	}
 	err = parseDigQuestion(s, m)
 	if err != nil {
 		return nil, err
@@ -430,6 +434,53 @@ func parseDigHeader(s *bufio.Scanner, m *dns.Msg) error {
 			m.MsgHdr.Id = uint16(i)
 		}
 	}
+	return nil
+}
+
+func parseDigFlags(s *bufio.Scanner, m *dns.Msg) error {
+
+	// Looking for the flags section of the header.
+	flagsSection := ";; flags: "
+
+	// Break out of the loop when the flags section is found.
+	for {
+		if strings.HasPrefix(s.Text(), flagsSection) {
+			break
+		}
+		if !s.Scan() {
+			return errors.New("flags section not found")
+		}
+	}
+
+	// Copy the flags section of the header to a local variable.
+	f := s.Text()
+
+	// Extract the flags part of the header.
+	flagsStart := strings.Index(f, "flags: ") + len("flags: ")
+	flagsEnd := strings.Index(f, "; QUERY:")
+	flagsStr := f[flagsStart:flagsEnd]
+
+	// Split the flags string around each instance of white space characters.
+	flags := strings.Fields(flagsStr)
+
+	// Set the flags in the dns.Msg object.
+	for _, flag := range flags {
+		switch flag {
+		case "qr":
+			m.Response = true
+		case "tc":
+			m.Truncated = true
+		case "rd":
+			m.RecursionDesired = true
+		case "ad":
+			m.AuthenticatedData = true
+		case "ra":
+			m.RecursionAvailable = true
+		case "aa":
+			m.Authoritative = true
+		}
+	}
+
 	return nil
 }
 
