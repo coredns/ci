@@ -57,13 +57,8 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 }
 
 // DoIntegrationTestUsingUpstreamServer executes a test case using the given upstream server.
-func DoIntegrationTestUsingUpstreamServer(tc test.Case, namespace string, dnsServer string) (*dns.Msg, error) {
-	digCmd := ""
-	if dnsServer == "" {
-		digCmd = "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +ignore +noedns +search +noshowsearch +time=10 +tries=6"
-	} else {
-		digCmd = "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +ignore +noedns +search +noshowsearch +time=10 +tries=6 @" + dnsServer
-	}
+func DoIntegrationTestWithUDPBufSize(tc test.Case, namespace string, bufsize string) (*dns.Msg, error) {
+	digCmd := "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +ignore +bufsize=" + bufsize + " +search +showsearch +time=10 +tries=6"
 
 	// attach to client and execute query.
 	var cmdout string
