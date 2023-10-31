@@ -56,6 +56,45 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 	return results[0], nil
 }
 
+// DoIntegrationTestUsingUpstreamServer executes a test case using the given upstream server.
+func DoIntegrationTestUsingUpstreamServer(tc test.Case, namespace string, dnsServer string) (*dns.Msg, error) {
+	digCmd := ""
+	if dnsServer == "" {
+		digCmd = "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +ignore +noedns +search +noshowsearch +time=10 +tries=6"
+	} else {
+		digCmd = "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +ignore +noedns +search +noshowsearch +time=10 +tries=6 @" + dnsServer
+	}
+
+	// attach to client and execute query.
+	var cmdout string
+	var err error
+	tries := 3
+	for {
+		cmdout, err = Kubectl("-n " + namespace + " exec " + clientName + " -- " + digCmd)
+		if err == nil {
+			break
+		}
+		tries = tries - 1
+		if tries == 0 {
+			return nil, errors.New("failed to execute query '" + digCmd + "' got error: '" + err.Error() + "'")
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	results, err := ParseDigResponse(cmdout)
+
+	if err != nil {
+		return nil, errors.New("failed to parse result: (" + err.Error() + ")" + cmdout)
+	}
+	if len(results) != 1 {
+		resultStr := ""
+		for i, r := range results {
+			resultStr += fmt.Sprintf("\nResponse %v\n", i) + r.String()
+		}
+		return nil, errors.New("expected 1 query attempt, observed " + strconv.Itoa(len(results)) + resultStr)
+	}
+	return results[0], nil
+}
+
 // DoIntegrationTests executes test cases
 func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
 	err := StartClientPod(namespace)
@@ -438,7 +477,6 @@ func parseDigHeader(s *bufio.Scanner, m *dns.Msg) error {
 }
 
 func parseDigFlags(s *bufio.Scanner, m *dns.Msg) error {
-
 	// Looking for the flags section of the header.
 	flagsSection := ";; flags: "
 
@@ -480,7 +518,6 @@ func parseDigFlags(s *bufio.Scanner, m *dns.Msg) error {
 			m.Authoritative = true
 		}
 	}
-
 	return nil
 }
 

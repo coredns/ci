@@ -200,3 +200,62 @@ func TestKubernetesA(t *testing.T) {
 		t.Fatalf("could not add service/endpoint via kubectl: %s", err)
 	}
 }
+
+var dnsTestCasesExternalDomain = []test.Case{
+	{ // An A record query for an exteranl domain name.
+		Qname: "github.com", Qtype: dns.TypeA,
+		Rcode:  dns.RcodeSuccess,
+		Answer: []dns.RR{},
+	},
+}
+
+func TestTCFlagForExternalDomain(t *testing.T) {
+	rmFunc, upstream, _ := UpstreamServer(t, "example.net", ExampleNet)
+	defer upstream.Stop()
+	defer rmFunc()
+	corefile := `    .:53 {
+        health
+        ready
+        errors
+        log
+		forward . /etc/resolv.conf
+    }
+`
+	err := LoadCorefile(corefile)
+	if err != nil {
+		t.Fatalf("Could not load corefile: %s", err)
+	}
+	testCases := dnsTestCasesExternalDomain
+	namespace := "test-1"
+	err = StartClientPod(namespace)
+	if err != nil {
+		t.Fatalf("failed to start client pod: %s", err)
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
+
+			res, err := DoIntegrationTestUsingUpstreamServer(tc, namespace, "")
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			if res.Truncated != false {
+				t.Errorf("External domain name test : "+tc.Qname+" - tc bit is %v, expected %v", res.Truncated, false)
+			}
+			if t.Failed() {
+				t.Errorf("coredns log: %s", CorednsLogs())
+			}
+
+			res, err = DoIntegrationTestUsingUpstreamServer(tc, namespace, "8.8.8.8")
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			if res.Truncated != false {
+				t.Errorf("External domain name test : "+tc.Qname+" - tc bit is %v, expected %v", res.Truncated, false)
+			}
+			if t.Failed() {
+				t.Errorf("coredns log: %s", CorednsLogs())
+			}
+		})
+	}
+}
