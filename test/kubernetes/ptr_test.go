@@ -10,25 +10,25 @@ import (
 )
 
 var dnsTestCasesPTR = []test.Case{
-	{ // A PTR record query for an existing service should return a record
+	{ // A PTR record query for an existing service Cluster IP should return a record
 		Qname: "100.0.96.10.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
 			test.PTR("100.0.96.10.in-addr.arpa. 303	IN	PTR	svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
-	{ // A PTR record query for an existing endpoint should return a record
-		Qname: "253.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
-		Rcode: dns.RcodeSuccess,
-		Answer: []dns.RR{
-			test.PTR("253.0.17.172.in-addr.arpa. 303	IN	PTR	172-17-0-253.svc-1-a.test-1.svc.cluster.local."),
-		},
-	},
-	{ // A PTR record query for an existing ipv6 endpoint should return a record
+	{ // A PTR record query for an existing endpoint with a hostname defined should return a record (e.g. Headless service)
 		Qname: "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.PTR("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa. 303 IN PTR 1234-abcd--1.headless-svc.test-1.svc.cluster.local."),
+			test.PTR("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa. 303 IN PTR foo6a.headless-svc.test-1.svc.cluster.local."),
+		},
+	},
+	{ // A PTR record query for an existing endpoint without a hostname defined should return NXDOMAIN (e.g. Cluster IP service)
+		Qname: "253.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
+		Rcode: dns.RcodeNameError,
+		Ns: []dns.RR{
+			test.SOA("0.96.10.in-addr.arpa.	303	IN	SOA	ns.dns.0.96.10.in-addr.arpa. hostmaster.0.96.10.in-addr.arpa. 1510339777 7200 1800 86400 30"),
 		},
 	},
 	{ // A PTR record query for an existing service in an UNEXPOSED namespace should return NXDOMAIN

@@ -233,9 +233,13 @@ metadata:
 subsets:
   - addresses:
       - ip: 172.17.0.255
+        hostname: foo4a
       - ip: 172.17.0.254
+        hostname: foo4b
       - ip: 1234:abcd::1
+        hostname: foo6a
       - ip: 1234:abcd::2
+        hostname: foo6b
     ports:
       - port: 1234
         name: c-port
