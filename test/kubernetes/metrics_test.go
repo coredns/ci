@@ -10,7 +10,7 @@ import (
 
 	"github.com/prometheus/common/expfmt"
 	api "k8s.io/api/core/v1"
-	discovery "k8s.io/api/discovery/v1beta1"
+	discovery "k8s.io/api/discovery/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -227,7 +227,7 @@ func updateEndpoints(t *testing.T, client kubernetes.Interface, name string, tri
 
 func createEndpointSlice(t *testing.T, client kubernetes.Interface, name string, triggerTime interface{}, endpoints []discovery.Endpoint) {
 	ctx := context.TODO()
-	_, err := client.DiscoveryV1beta1().EndpointSlices(namespace).Create(ctx, buildEndpointSlice(name, triggerTime, endpoints), meta.CreateOptions{})
+	_, err := client.DiscoveryV1().EndpointSlices(namespace).Create(ctx, buildEndpointSlice(name, triggerTime, endpoints), meta.CreateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -235,7 +235,7 @@ func createEndpointSlice(t *testing.T, client kubernetes.Interface, name string,
 
 func updateEndpointSlice(t *testing.T, client kubernetes.Interface, name string, triggerTime interface{}, endpoints []discovery.Endpoint) {
 	ctx := context.TODO()
-	_, err := client.DiscoveryV1beta1().EndpointSlices(namespace).Update(ctx, buildEndpointSlice(name, triggerTime, endpoints), meta.UpdateOptions{})
+	_, err := client.DiscoveryV1().EndpointSlices(namespace).Update(ctx, buildEndpointSlice(name, triggerTime, endpoints), meta.UpdateOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}

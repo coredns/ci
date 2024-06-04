@@ -14,7 +14,7 @@ commands:
             GOROOT=$(go env GOROOT)
             sudo rm -r $(go env GOROOT)
             sudo mkdir $GOROOT
-            LATEST=$(curl -s https://golang.org/VERSION?m=text)
+            LATEST=$(curl -Ls https://go.dev/VERSION?m=text | head -1)
             curl https://dl.google.com/go/${LATEST}.linux-amd64.tar.gz | sudo tar xz -C $GOROOT --strip-components=1
 
   setupkubernetes:
@@ -32,7 +32,7 @@ commands:
             git clone https://github.com/${CIRCLE_PROJECT_USERNAME}/coredns ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
             cd ~/go/src/${CIRCLE_PROJECT_USERNAME}/coredns
             make coredns SYSTEM="GOOS=linux" && \
-            docker build -t coredns . && \
+            docker buildx build -t coredns . && \
             kind load docker-image coredns
 
   buildkubernetaiimage:
@@ -49,7 +49,7 @@ commands:
             mv ./coredns ../coredns/
             cd ../coredns/
 
-            docker build -t coredns .
+            docker buildx build -t coredns .
             kind load docker-image coredns
 
   buildmetadataedns0image:
@@ -66,16 +66,16 @@ commands:
             mv ./coredns ../coredns/
             cd ../coredns/
 
-            docker build -t coredns .
+            docker buildx build -t coredns .
             kind load docker-image coredns
 
 executors:
   default-executor:
     machine:
-      image: ubuntu-2004:202104-01
+      image: ubuntu-2204:2024.04.4
     working_directory: ~/go/src/${CIRCLE_PROJECT_USERNAME}/ci
     environment:
-      - KIND_VERSION: v0.11.1
+      - KIND_VERSION: v0.23.0
       - KUBECONFIG: /home/circleci/.kube/kind-config-kind
 
 
@@ -116,7 +116,7 @@ jobs:
             GO111MODULE=on go test -v ./...
   k8s-deployment-tests:
     environment:
-      - K8S_VERSION: v1.21.1
+      - K8S_VERSION: v1.25.16
     executor: default-executor
     steps:
       - initworkingdir
@@ -169,4 +169,4 @@ workflows:
       - kubernetes-tests:
           matrix:
             parameters:
-              k8s-version: ["v1.21.1", "v1.20.7", "v1.19.11"]
+              k8s-version: ["v1.25.16", "v1.26.15", "v1.27.13", "v1.28.9", "v1.29.4"]
