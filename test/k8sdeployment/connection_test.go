@@ -13,8 +13,14 @@ import (
 // This test is to catch bugs/errors such as the one reported in https://github.com/coredns/coredns/issues/2464
 func TestConnectionAfterAPIRestart(t *testing.T) {
 	// Apply manifests via coredns/deployment deployment script ...
-	cmd := exec.Command("sh", "-c", " ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment/kubernetes/deploy.sh -s -i 10.96.0.10 -r 10.96.0.0/8 -r 172.17.0.0/16 | kubectl apply -f -")
+	cmd := exec.Command("sh", "-c", " ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment/kubernetes/deploy.sh -s -i 10.96.0.10 -r 10.96.0.0/8 -r 172.17.0.0/16 | kubectl delete --ignore-not-found=true -f -")
 	cmdout, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("failed to delete deployment objects: %s\nerr: %s", string(cmdout), err)
+	}
+
+	cmd = exec.Command("sh", "-c", " ~/go/src/${CIRCLE_PROJECT_USERNAME}/deployment/kubernetes/deploy.sh -s -i 10.96.0.10 -r 10.96.0.0/8 -r 172.17.0.0/16 | kubectl apply -f -")
+	cmdout, err = cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("deployment script failed: %s\nerr: %s", string(cmdout), err)
 	}
