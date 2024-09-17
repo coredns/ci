@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -29,7 +30,7 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 	switch tc.Qtype {
 	case dns.TypeAXFR:
 		digCmd = "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +time=10 +tries=6"
-		dp = parseDigAXFR
+		dp = ParseDigAXFR
 	default:
 		digCmd = "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +search +showsearch +time=10 +tries=6"
 		dp = parseDig
@@ -393,7 +394,7 @@ func ParseDigResponse(r string, dp DigParser) ([]*dns.Msg, error) {
 }
 
 // DigParser is a function that specialises in parsing different responses from running dig.
-// The regular parseDig parser is acceptable for most tests, whilst the parseDigAXFR handles this special case.
+// The regular parseDig parser is acceptable for most tests, whilst the ParseDigAXFR handles this special case.
 type DigParser func(s *bufio.Scanner) (*dns.Msg, error)
 
 // parseDig parses a single dig-like response and returns a dns.Msg
@@ -414,8 +415,8 @@ func parseDig(s *bufio.Scanner) (*dns.Msg, error) {
 	return m, nil
 }
 
-// parseDigAXFR specifically parses AXFR responses which have a different format.
-func parseDigAXFR(s *bufio.Scanner) (*dns.Msg, error) {
+// ParseDigAXFR specifically parses AXFR responses which have a different format.
+func ParseDigAXFR(s *bufio.Scanner) (*dns.Msg, error) {
 	m := new(dns.Msg)
 	for s.Scan() {
 		if s.Text() == "" {
@@ -426,7 +427,7 @@ func parseDigAXFR(s *bufio.Scanner) (*dns.Msg, error) {
 		}
 		r, err := dns.NewRR(s.Text())
 		if err != nil {
-			fmt.Println("parseDigAXFR RR record could not be parsed")
+			fmt.Println("ParseDigAXFR RR record could not be parsed")
 			return nil, err
 		}
 		m.Answer = append(m.Answer, r)
@@ -559,3 +560,131 @@ example.net. IN A 13.14.15.16
 	CoreDNSLabel   = "k8s-app=kube-dns"
 	APIServerLabel = "component=kube-apiserver"
 )
+
+// ValidateAXFR compares the dns records returned against a set of expected records.
+// It ensures that the axfr response begins and ends with an SOA record.
+// It will only test the first 3 tuples of each A record.
+func ValidateAXFR(xfr []dns.RR, expected []dns.RR) []error {
+	var failures []error
+	if xfr[0].Header().Rrtype != dns.TypeSOA {
+		failures = append(failures, errors.New("Invalid transfer response, does not start with SOA record"))
+	}
+	if xfr[len(xfr)-1].Header().Rrtype != dns.TypeSOA {
+		failures = append(failures, errors.New("Invalid transfer response, does not end with SOA record"))
+	}
+
+	// make a map of xfr responses to search...
+	xfrMap := make(map[int]dns.RR, len(xfr))
+	for i := range xfr {
+		xfrMap[i] = xfr[i]
+	}
+
+	// for each expected entry find a result response which matches.
+	for i := range expected {
+		matched := false
+		for key, resultRR := range xfrMap {
+			hmatch, err := matchHeader(expected[i].Header(), resultRR.Header())
+			if err != nil {
+				failures = append(failures, err)
+				break
+			}
+			if !hmatch {
+				continue
+			}
+
+			// headers match
+			// special matchers and default full match
+			switch expected[i].Header().Rrtype {
+			case dns.TypeSOA, dns.TypeA:
+				matched = true
+				break
+			case dns.TypeSRV:
+				srvMatch, err := matchSRVResponse(expected[i].(*dns.SRV), resultRR.(*dns.SRV))
+				if err != nil {
+					failures = append(failures, err)
+					break
+				}
+				if srvMatch {
+					matched = true
+					break
+				}
+			default:
+				if dns.IsDuplicate(expected[i], resultRR) {
+					matched = true
+				}
+			}
+
+			if matched {
+				delete(xfrMap, key)
+				break
+			}
+		}
+		if !matched {
+			failures = append(failures, fmt.Errorf("the expected AXFR record not found in results:\n%s\n", expected[i]))
+		}
+	}
+
+	// catch unexpected extra records
+	if len(xfrMap) > 0 {
+		for _, r := range xfrMap {
+			failures = append(failures, fmt.Errorf("additional axfr record not expected: %s", r.String()))
+		}
+	}
+	return failures
+}
+
+// matchHeader will return true when two headers are exactly equal or the expected and resultant header
+// both contain a dashed ip address and the domain matches.
+func matchHeader(expected, result *dns.RR_Header) (bool, error) {
+	if expected.Rrtype != result.Rrtype {
+		return false, nil
+	}
+	if expected.Class != result.Class {
+		return false, nil
+	}
+	if expected.Rrtype != result.Rrtype {
+		return false, nil
+	}
+	expectedNameReg, err := zoneToRelaxedRegex(expected.Name)
+	if err != nil {
+		return false, fmt.Errorf("failed to covert dns name %s to regex: %v", expected.Name, err)
+	}
+	if !expectedNameReg.MatchString(result.Name) {
+		return false, nil
+	}
+	return true, nil
+}
+
+// validateSRVResponse matches an SRV response record
+func matchSRVResponse(expectedSRV, resultSRV *dns.SRV) (bool, error) {
+	// test other SRV record attributes...
+	if expectedSRV.Port != resultSRV.Port {
+		return false, nil
+	}
+	if expectedSRV.Priority != resultSRV.Priority {
+		return false, nil
+	}
+	if expectedSRV.Weight != resultSRV.Weight {
+		return false, nil
+	}
+
+	expectedTargetReg, err := zoneToRelaxedRegex(expectedSRV.Target)
+	if err != nil {
+		return false, fmt.Errorf("failed to covert srv target %s to regex: %v", expectedSRV.Target, err)
+	}
+	if !expectedTargetReg.MatchString(resultSRV.Target) {
+		return false, nil
+	}
+	return true, nil
+}
+
+var ipPartMatcher = regexp.MustCompile(`^\d+-\d+-\d+-\d+\.`)
+
+// zoneToRelaxedRegex creates a regular expression from a domain name, replacing ipv4 dashed addresses with a
+// more generalised matcher that will match any address.
+func zoneToRelaxedRegex(source string) (*regexp.Regexp, error) {
+	if !ipPartMatcher.MatchString(source) {
+		return regexp.Compile(`^` + source + `$`)
+	}
+	return regexp.Compile(ipPartMatcher.ReplaceAllString(source, `^\d+-\d+-\d+-\d+\.`) + `$`)
+}
