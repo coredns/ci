@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: app-1-b-c
-        image: gcr.io/google_containers/pause-amd64:3.0
+        image: k8s.gcr.io/pause:3.9
         ports:
         - containerPort: 80
           name: http
@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
       - name: app-c-c
-        image: gcr.io/google_containers/pause-amd64:3.0
+        image: k8s.gcr.io/pause:3.9
         ports:
         - containerPort: 1234
           name: c-port
@@ -71,7 +71,7 @@ spec:
     spec:
       containers:
       - name: app-c-c
-        image: gcr.io/google_containers/pause-amd64:3.0
+        image: k8s.gcr.io/pause:3.9
         ports:
         - containerPort: 1234
           name: c-port
@@ -296,7 +296,7 @@ metadata:
 spec:
   containers:
     - name: pause
-      image: gcr.io/google_containers/pause-amd64:3.0
+      image: k8s.gcr.io/pause:3.9
       ports:
         - containerPort: 80
           name: http
@@ -326,7 +326,261 @@ metadata:
 spec:
   containers:
     - name: pause
-      image: gcr.io/google_containers/pause-amd64:3.0
+      image: k8s.gcr.io/pause:3.9
+      ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-4
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: de-1-b
+  namespace: test-4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-1-b
+  template:
+    metadata:
+      labels:
+        app: app-1-b
+    spec:
+      containers:
+      - name: app-1-b-c
+        image: k8s.gcr.io/pause:3.9
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: de-c
+  namespace: test-4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-c
+  template:
+    metadata:
+      labels:
+        app: app-c
+    spec:
+      containers:
+      - name: app-c-c
+        image: k8s.gcr.io/pause:3.9
+        ports:
+        - containerPort: 1234
+          name: c-port
+          protocol: UDP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unready
+  namespace: test-4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-unready
+  template:
+    metadata:
+      labels:
+        app: app-unready
+    spec:
+      containers:
+        - name: app-unready
+          image: invalid-image:0.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 1234
+              name: c-port
+              protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-1-a
+  namespace: test-4
+spec:
+  clusterIP: 10.96.0.200
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    protocol: TCP
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: svc-1-a
+  namespace: test-4
+subsets:
+  - addresses:
+      - ip: 172.17.0.251
+    ports:
+      - port: 80
+        name: http
+        protocol: TCP
+      - port: 443
+        name: https
+        protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-1-b
+  namespace: test-4
+spec:
+  selector:
+    app: app-1-b
+  clusterIP: 10.96.0.210
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-c
+  namespace: test-4
+spec:
+  selector:
+    app: app-c
+  clusterIP: 10.96.0.215
+  ports:
+  - name: c-port
+    port: 1234
+    protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-unready
+  namespace: test-4
+spec:
+  selector:
+    app: app-unready
+  clusterIP: None
+  ports:
+    - name: c-port
+      port: 1234
+      protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-svc
+  namespace: test-4
+spec:
+  clusterIP: None
+  ports:
+  - name: c-port
+    port: 1234
+    protocol: UDP
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: headless-svc
+  namespace: test-4
+subsets:
+  - addresses:
+      - ip: 172.17.0.250
+      - ip: 172.17.0.249
+      - ip: 1234:abcd::3
+      - ip: 1234:abcd::4
+    ports:
+      - port: 1234
+        name: c-port
+        protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ext-svc
+  namespace: test-4
+spec:
+  type: ExternalName
+  externalName: example.net
+  ports:
+  - name: c-port
+    port: 1234
+    protocol: UDP
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-1
+  namespace: test-5
+spec:
+  selector:
+    app: headless-1
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-name
+  namespace: test-5
+  labels:
+    app: headless-1
+spec:
+  containers:
+    - name: pause
+      image: k8s.gcr.io/pause:3.9
+      ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-2
+  namespace: test-5
+spec:
+  selector:
+    app: headless-2
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-name-longer-than-63-characters-making-it-an-invalid-dns-label
+  namespace: test-5
+  labels:
+    app: headless-2
+spec:
+  containers:
+    - name: pause
+      image: k8s.gcr.io/pause:3.9
       ports:
         - containerPort: 80
           name: http

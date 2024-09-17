@@ -24,7 +24,16 @@ import (
 
 // DoIntegrationTest executes a test case
 func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
-	digCmd := "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +search +showsearch +time=10 +tries=6"
+	var digCmd string
+	var dp DigParser
+	switch tc.Qtype {
+	case dns.TypeAXFR:
+		digCmd = "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +time=10 +tries=6"
+		dp = parseDigAXFR
+	default:
+		digCmd = "dig -t " + dns.TypeToString[tc.Qtype] + " " + tc.Qname + " +search +showsearch +time=10 +tries=6"
+		dp = parseDig
+	}
 
 	// attach to client and execute query.
 	var cmdout string
@@ -41,7 +50,7 @@ func DoIntegrationTest(tc test.Case, namespace string) (*dns.Msg, error) {
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
-	results, err := ParseDigResponse(cmdout)
+	results, err := ParseDigResponse(cmdout, dp)
 
 	if err != nil {
 		return nil, errors.New("failed to parse result: (" + err.Error() + ")" + cmdout)
@@ -361,13 +370,13 @@ func Kubectl(args string) (result string, err error) {
 }
 
 // ParseDigResponse parses dig-like command output and returns a dns.Msg
-func ParseDigResponse(r string) ([]*dns.Msg, error) {
+func ParseDigResponse(r string, dp DigParser) ([]*dns.Msg, error) {
 	s := bufio.NewScanner(strings.NewReader(r))
 	var msgs []*dns.Msg
 	var err error
 
 	for err == nil {
-		m, err := parseDig(s)
+		m, err := dp(s)
 		if err != nil {
 			break
 		}
@@ -383,6 +392,10 @@ func ParseDigResponse(r string) ([]*dns.Msg, error) {
 	return msgs, nil
 }
 
+// DigParser is a function that specialises in parsing different responses from running dig.
+// The regular parseDig parser is acceptable for most tests, whilst the parseDigAXFR handles this special case.
+type DigParser func(s *bufio.Scanner) (*dns.Msg, error)
+
 // parseDig parses a single dig-like response and returns a dns.Msg
 func parseDig(s *bufio.Scanner) (*dns.Msg, error) {
 	m := new(dns.Msg)
@@ -397,6 +410,29 @@ func parseDig(s *bufio.Scanner) (*dns.Msg, error) {
 	err = parseDigSections(s, m)
 	if err != nil {
 		return nil, err
+	}
+	return m, nil
+}
+
+// parseDigAXFR specifically parses AXFR responses which have a different format.
+func parseDigAXFR(s *bufio.Scanner) (*dns.Msg, error) {
+	m := new(dns.Msg)
+	for s.Scan() {
+		if s.Text() == "" {
+			continue
+		}
+		if strings.HasPrefix(s.Text(), ";") {
+			continue
+		}
+		r, err := dns.NewRR(s.Text())
+		if err != nil {
+			fmt.Println("parseDigAXFR RR record could not be parsed")
+			return nil, err
+		}
+		m.Answer = append(m.Answer, r)
+	}
+	if len(m.Answer) == 0 {
+		return nil, fmt.Errorf("no more records")
 	}
 	return m, nil
 }
