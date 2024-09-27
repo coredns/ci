@@ -55,14 +55,14 @@ func TestAXFR(t *testing.T) {
 test-4.svc.cluster.local. 5	IN	SOA	ns.dns.test-4.svc.cluster.local. hostmaster.test-4.svc.cluster.local. 1726484129 7200 1800 86400 5
 ext-svc.test-4.svc.test-4.svc.cluster.local. 5 IN CNAME	example.net.
 headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.252
-172-17-0-252.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.252
-_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 172-17-0-252.headless-svc.test-4.svc.test-4.svc.cluster.local.
+svc-d.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.252
+_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 svc-d.headless-svc.test-4.svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.253
 172-17-0-253.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.253
-_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 172-17-0-253.headless-svc.test-4.svc.test-4.svc.cluster.local.
+_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234svc-1-a.headless-svc.test-4.svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
-1234-abcd--3.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
-_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 1234-abcd--3.headless-svc.test-4.svc.test-4.svc.cluster.local.
+headless-svc-3.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
+_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 headless-svc-3.headless-svc.test-4.svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
 1234-abcd--4.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
 _c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 1234-abcd--4.headless-svc.test-4.svc.test-4.svc.cluster.local.
@@ -143,8 +143,8 @@ test-5.svc.cluster.local. 5	IN	SOA	ns.dns.test-5.svc.cluster.local. hostmaster.t
 cluster.local.		5	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1726499016 7200 1800 86400 5
 ext-svc.test-4.svc.cluster.local. 5 IN	CNAME	example.net.
 headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
-1234-abcd--3.headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
-_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 1234-abcd--3.headless-svc.test-4.svc.cluster.local.
+headless-svc-3.headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
+_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-svc-3.headless-svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
 1234-abcd--4.headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
 _c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 1234-abcd--4.headless-svc.test-4.svc.cluster.local.
