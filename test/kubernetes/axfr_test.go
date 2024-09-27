@@ -24,7 +24,7 @@ func loadAXFRAnswers(t *testing.T, results string) []dns.RR {
 
 func TestAXFR(t *testing.T) {
 	testCases := []test.Case{
-		{ // An A record query for an existing service should return a record
+		{ // An AXFR query should return the zone
 			Qname: "cluster.local.", Qtype: dns.TypeAXFR,
 			Rcode: dns.RcodeSuccess,
 			Answer: loadAXFRAnswers(t, `
@@ -39,11 +39,7 @@ headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
 headless-svc-4.headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
 _c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-svc-4.headless-svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.cluster.local. 5 IN A	172.17.0.252
-svc-d.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.252
-_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 svc-d.headless-svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.cluster.local. 5 IN A	172.17.0.253
-svc-1-a.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.253
-_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 svc-1-a.headless-svc.test-4.svc.cluster.local.
 svc-1-a.test-4.svc.cluster.local. 5 IN	A	10.96.0.200
 svc-1-a.test-4.svc.cluster.local. 5 IN	SRV	0 100 80 svc-1-a.test-4.svc.cluster.local.
 _http._tcp.svc-1-a.test-4.svc.cluster.local. 5 IN SRV 0 100 80 svc-1-a.test-4.svc.cluster.local.
@@ -56,6 +52,10 @@ svc-c.test-4.svc.cluster.local.	5 IN	A	10.96.0.215
 svc-c.test-4.svc.cluster.local.	5 IN	SRV	0 100 1234 svc-c.test-4.svc.cluster.local.
 _c-port._udp.svc-c.test-4.svc.cluster.local. 5 IN SRV 0 100 1234 svc-c.test-4.svc.cluster.local.
 cluster.local.		5	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1726438867 7200 1800 86400 5
+headless-svc-1.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.250
+_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-svc-2.headless-svc.test-4.svc.cluster.local.
+headless-svc-2.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.249
+_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-svc-1.headless-svc.test-4.svc.cluster.local.
 `),
 		},
 	}
