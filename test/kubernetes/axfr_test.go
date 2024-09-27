@@ -43,7 +43,7 @@ svc-d.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.252
 _c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 svc-d.headless-svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.cluster.local. 5 IN A	172.17.0.253
 172-17-0-253.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.253
-_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234svc-1-a.headless-svc.test-4.svc.cluster.local.
+_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 svc-1-a.headless-svc.test-4.svc.cluster.local.
 svc-1-a.test-4.svc.cluster.local. 5 IN	A	10.96.0.200
 svc-1-a.test-4.svc.cluster.local. 5 IN	SRV	0 100 80 svc-1-a.test-4.svc.cluster.local.
 _http._tcp.svc-1-a.test-4.svc.cluster.local. 5 IN SRV 0 100 80 svc-1-a.test-4.svc.cluster.local.
