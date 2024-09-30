@@ -53,30 +53,36 @@ func TestAXFR(t *testing.T) {
 				Rcode: dns.RcodeSuccess,
 				Answer: loadAXFRAnswers(t, `
 test-4.svc.cluster.local. 5	IN	SOA	ns.dns.test-4.svc.cluster.local. hostmaster.test-4.svc.cluster.local. 1726484129 7200 1800 86400 5
+
 ext-svc.test-4.svc.test-4.svc.cluster.local. 5 IN CNAME	example.net.
-headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.252
-svc-d.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.252
-_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 svc-d.headless-svc.test-4.svc.test-4.svc.cluster.local.
-headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.253
-172-17-0-253.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.253
-_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 svc-1-a.headless-svc.test-4.svc.test-4.svc.cluster.local.
+
+headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.250
+headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.249
 headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
-headless-svc-3.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
-_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 headless-svc-3.headless-svc.test-4.svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
-1234-abcd--4.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
-_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 1234-abcd--4.headless-svc.test-4.svc.test-4.svc.cluster.local.
+headless-svc-1.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.250
+headless-svc-2.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN A 172.17.0.249
+headless-svc-3.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
+headless-svc-4.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
+_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 headless-svc-1.headless-svc.test-4.svc.test-4.svc.cluster.local.
+_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 headless-svc-2.headless-svc.test-4.svc.test-4.svc.cluster.local.
+_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 headless-svc-3.headless-svc.test-4.svc.test-4.svc.cluster.local.
+_c-port._udp.headless-svc.test-4.svc.test-4.svc.cluster.local. 5 IN SRV	0 50 1234 headless-svc-4.headless-svc.test-4.svc.test-4.svc.cluster.local.
+
 svc-1-a.test-4.svc.test-4.svc.cluster.local. 5 IN A 10.96.0.200
 svc-1-a.test-4.svc.test-4.svc.cluster.local. 5 IN SRV 0 100 80 svc-1-a.test-4.svc.test-4.svc.cluster.local.
 _http._tcp.svc-1-a.test-4.svc.test-4.svc.cluster.local.	5 IN SRV 0 100 80 svc-1-a.test-4.svc.test-4.svc.cluster.local.
 svc-1-a.test-4.svc.test-4.svc.cluster.local. 5 IN SRV 0 100 443 svc-1-a.test-4.svc.test-4.svc.cluster.local.
 _https._tcp.svc-1-a.test-4.svc.test-4.svc.cluster.local. 5 IN SRV 0 100 443 svc-1-a.test-4.svc.test-4.svc.cluster.local.
+
 svc-1-b.test-4.svc.test-4.svc.cluster.local. 5 IN A 10.96.0.210
 svc-1-b.test-4.svc.test-4.svc.cluster.local. 5 IN SRV 0 100 80 svc-1-b.test-4.svc.test-4.svc.cluster.local.
 _http._tcp.svc-1-b.test-4.svc.test-4.svc.cluster.local.	5 IN SRV 0 100 80 svc-1-b.test-4.svc.test-4.svc.cluster.local.
+
 svc-c.test-4.svc.test-4.svc.cluster.local. 5 IN	A 10.96.0.215
 svc-c.test-4.svc.test-4.svc.cluster.local. 5 IN	SRV 0 100 1234 svc-c.test-4.svc.test-4.svc.cluster.local.
 _c-port._udp.svc-c.test-4.svc.test-4.svc.cluster.local.	5 IN SRV 0 100 1234 svc-c.test-4.svc.test-4.svc.cluster.local.
+
 test-4.svc.cluster.local. 5	IN	SOA	ns.dns.test-4.svc.cluster.local. hostmaster.test-4.svc.cluster.local. 1726484129 7200 1800 86400 5
 `),
 			},
@@ -106,12 +112,14 @@ test-4.svc.cluster.local. 5	IN	SOA	ns.dns.test-4.svc.cluster.local. hostmaster.t
 				Rcode: dns.RcodeSuccess,
 				Answer: loadAXFRAnswers(t, `
 test-5.svc.cluster.local. 5	IN	SOA	ns.dns.test-5.svc.cluster.local. hostmaster.test-5.svc.cluster.local. 1726484386 7200 1800 86400 5
+
 headless-1.test-5.svc.test-5.svc.cluster.local.	5 IN A 172.17.0.173
 test-name.headless-1.test-5.svc.test-5.svc.cluster.local. 5 IN A 172.17.0.173
 _http._tcp.headless-1.test-5.svc.test-5.svc.cluster.local. 5 IN	SRV 0 100 80 test-name.headless-1.test-5.svc.test-5.svc.cluster.local.
 headless-2.test-5.svc.test-5.svc.cluster.local.	5 IN A 172.17.0.182
 172-17-0-182.headless-2.test-5.svc.test-5.svc.cluster.local. 5 IN A 172.17.0.182
 _http._tcp.headless-2.test-5.svc.test-5.svc.cluster.local. 5 IN	SRV 0 100 80 172-17-0-182.headless-2.test-5.svc.test-5.svc.cluster.local.
+
 test-5.svc.cluster.local. 5	IN	SOA	ns.dns.test-5.svc.cluster.local. hostmaster.test-5.svc.cluster.local. 1726484386 7200 1800 86400 5
 `),
 			},
@@ -146,14 +154,14 @@ headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
 headless-svc-3.headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::3
 _c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-svc-3.headless-svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
-1234-abcd--4.headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
-_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 1234-abcd--4.headless-svc.test-4.svc.cluster.local.
+headless-svc-4.headless-svc.test-4.svc.cluster.local. 5 IN AAAA 1234:abcd::4
+_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-svc-4.headless-svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.cluster.local. 5 IN A	172.17.0.249
-172-17-0-249.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.249
-_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 172-17-0-249.headless-svc.test-4.svc.cluster.local.
+headless-svc-2.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.249
+_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-svc-2.headless-svc.test-4.svc.cluster.local.
 headless-svc.test-4.svc.cluster.local. 5 IN A	172.17.0.250
-172-17-0-250.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.250
-_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 172-17-0-250.headless-svc.test-4.svc.cluster.local.
+headless-svc-1.headless-svc.test-4.svc.cluster.local. 5 IN A 172.17.0.250
+_c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-svc-1.headless-svc.test-4.svc.cluster.local.
 svc-1-a.test-4.svc.cluster.local. 5 IN	A	10.96.0.200
 svc-1-a.test-4.svc.cluster.local. 5 IN	SRV	0 100 80 svc-1-a.test-4.svc.cluster.local.
 _http._tcp.svc-1-a.test-4.svc.cluster.local. 5 IN SRV 0 100 80 svc-1-a.test-4.svc.cluster.local.
