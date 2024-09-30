@@ -124,6 +124,7 @@ metadata:
 subsets:
   - addresses:
       - ip: 172.17.0.253
+        hostname: svc-1-a
     ports:
       - port: 80
         name: http
@@ -208,6 +209,7 @@ metadata:
 subsets:
   - addresses:
       - ip: 172.17.0.252
+        hostname: svc-d
     ports:
       - port: 1234
         name: c-port
@@ -233,9 +235,13 @@ metadata:
 subsets:
   - addresses:
       - ip: 172.17.0.255
+        hostname: headless-svc-1
       - ip: 172.17.0.254
+        hostname: headless-svc-2
       - ip: 1234:abcd::1
+        hostname: headless-svc-3
       - ip: 1234:abcd::2
+        hostname: headless-svc-4
     ports:
       - port: 1234
         name: c-port
@@ -430,6 +436,7 @@ metadata:
 subsets:
   - addresses:
       - ip: 172.17.0.251
+        hostname: svc-1-a
     ports:
       - port: 80
         name: http
@@ -500,9 +507,13 @@ metadata:
 subsets:
   - addresses:
       - ip: 172.17.0.250
+        hostname: headless-svc-1
       - ip: 172.17.0.249
+        hostname: headless-svc-2
       - ip: 1234:abcd::3
+        hostname: headless-svc-3
       - ip: 1234:abcd::4
+        hostname: headless-svc-4
     ports:
       - port: 1234
         name: c-port

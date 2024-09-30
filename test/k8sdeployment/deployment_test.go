@@ -32,7 +32,7 @@ var deploymentDNSCases = []test.Case{
 		Qname: "253.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.PTR("253.0.17.172.in-addr.arpa. 303	IN	PTR	172-17-0-253.svc-1-a.test-1.svc.cluster.local."),
+			test.PTR("253.0.17.172.in-addr.arpa. 303	IN	PTR	svc-1-a.svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
 }

@@ -21,14 +21,14 @@ var dnsTestCasesPTR = []test.Case{
 		Qname: "253.0.17.172.in-addr.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.PTR("253.0.17.172.in-addr.arpa. 303	IN	PTR	172-17-0-253.svc-1-a.test-1.svc.cluster.local."),
+			test.PTR("253.0.17.172.in-addr.arpa. 303	IN	PTR	svc-1-a.svc-1-a.test-1.svc.cluster.local."),
 		},
 	},
 	{ // A PTR record query for an existing ipv6 endpoint should return a record
 		Qname: "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa.", Qtype: dns.TypePTR,
 		Rcode: dns.RcodeSuccess,
 		Answer: []dns.RR{
-			test.PTR("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa. 303 IN PTR 1234-abcd--1.headless-svc.test-1.svc.cluster.local."),
+			test.PTR("1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.d.c.b.a.4.3.2.1.ip6.arpa. 303 IN PTR headless-svc-3.headless-svc.test-1.svc.cluster.local."),
 		},
 	},
 	{ // A PTR record query for an existing service in an UNEXPOSED namespace should return NXDOMAIN
