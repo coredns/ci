@@ -76,7 +76,7 @@ func DoIntegrationTests(t *testing.T, testCases []test.Case, namespace string) {
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
 			res, err := DoIntegrationTest(tc, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Error(err.Error())
 			}
 			test.CNAMEOrder(res)
 			sort.Sort(test.RRSet(tc.Answer))
@@ -433,7 +433,7 @@ func ParseDigAXFR(s *bufio.Scanner) (*dns.Msg, error) {
 		m.Answer = append(m.Answer, r)
 	}
 	if len(m.Answer) == 0 {
-		return nil, fmt.Errorf("no more records")
+		return nil, errors.New("no more records")
 	}
 	return m, nil
 }

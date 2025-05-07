@@ -57,7 +57,7 @@ func TestKubernetesEndpointPodNames(t *testing.T) {
 		t.Run(fmt.Sprintf("%s %s", expected.Qname, dns.TypeToString[expected.Qtype]), func(t *testing.T) {
 			result, err := DoIntegrationTest(expected.Case, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Error(err.Error())
 			}
 
 			if len(result.Answer) != expected.AnswerCount {

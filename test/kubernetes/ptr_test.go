@@ -80,7 +80,7 @@ func TestKubernetesPTR(t *testing.T) {
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
 			res, err := DoIntegrationTest(tc, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Error(err.Error())
 			}
 			test.CNAMEOrder(res)
 			if err := test.SortAndCheck(res, tc); err != nil {

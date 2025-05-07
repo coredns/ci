@@ -192,7 +192,7 @@ cluster.local.		5	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1726499
 
 			res, err := kubernetes.DoIntegrationTest(tc.dig, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Error(err.Error())
 			}
 			if res != nil {
 				failures := kubernetes.ValidateAXFR(res.Answer, tc.dig.Answer)
