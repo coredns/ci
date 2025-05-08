@@ -52,7 +52,7 @@ func TestMetadata(t *testing.T) {
 
 		tries -= 1
 		if tries == 0 {
-			t.Errorf("Failed to get logs")
+			t.Error("Failed to get logs")
 		}
 		time.Sleep(500 * time.Millisecond)
 		logged = kubernetes.CorednsLogs()

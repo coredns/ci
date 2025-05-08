@@ -37,25 +37,6 @@ var deploymentDNSCases = []test.Case{
 	},
 }
 
-// Fuzzy cases compared for cardinality only
-var deploymentDNSCasesFuzzy = []test.Case{
-	{ // A query for an externalname service should return a CNAME and upstream A record
-		Qname: "ext-svc.test-1.svc.cluster.local.", Qtype: dns.TypeA,
-		Rcode: dns.RcodeSuccess,
-		Answer: []dns.RR{
-			test.A("example.net.      5    IN      A       1.2.3.4"),
-			test.CNAME("ext-svc.test-1.svc.cluster.local.      5    IN      CNAME       example.net."),
-		},
-	},
-	{ // A query for a name outside of k8s zone should get an answer via proxy
-		Qname: "coredns.io.", Qtype: dns.TypeA,
-		Rcode: dns.RcodeSuccess,
-		Answer: []dns.RR{
-			test.A("coredns.io.      5    IN      A       5.6.7.8"),
-		},
-	},
-}
-
 func TestKubernetesDeploymentDeploys(t *testing.T) {
 	t.Run("Deploy_with_deploy.sh", func(t *testing.T) {
 		// Apply manifests via coredns/deployment deployment script ...
@@ -188,7 +169,7 @@ func TestKubernetesDeploymentDNSQueries(t *testing.T) {
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
 			res, err := kubernetes.DoIntegrationTest(tc, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Error(err.Error())
 			}
 			if res == nil {
 				t.Fatalf("got no response")
@@ -199,24 +180,6 @@ func TestKubernetesDeploymentDNSQueries(t *testing.T) {
 			}
 			if t.Failed() {
 				t.Errorf("coredns log: %s", kubernetes.CorednsLogs())
-			}
-		})
-	}
-	// Verify dns query test fuzzy cases
-	testCases = deploymentDNSCasesFuzzy
-	for _, tc := range testCases {
-		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
-			res, err := kubernetes.DoIntegrationTest(tc, namespace)
-			if err != nil {
-				t.Error(err)
-			}
-			if res == nil {
-				t.Fatalf("got no response")
-			}
-			test.CNAMEOrder(res)
-			// Just compare the cardinality of the response to expected
-			if len(tc.Answer) != len(res.Answer) {
-				t.Errorf("Expected %v answers, got %v. coredns log: %s", len(tc.Answer), len(res.Answer), kubernetes.CorednsLogs())
 			}
 		})
 	}

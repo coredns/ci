@@ -92,7 +92,7 @@ _c-port._udp.headless-svc.test-4.svc.cluster.local. 5 IN SRV 0 50 1234 headless-
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
 			res, err := DoIntegrationTest(tc, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Error(err.Error())
 			}
 			if res != nil {
 				failures := ValidateAXFR(res.Answer, tc.Answer)
@@ -161,7 +161,7 @@ cluster.local.		5	IN	SOA	ns.dns.cluster.local. hostmaster.cluster.local. 1726233
 		t.Run(fmt.Sprintf("%s %s", tc.Qname, dns.TypeToString[tc.Qtype]), func(t *testing.T) {
 			res, err := DoIntegrationTest(tc, namespace)
 			if err != nil {
-				t.Errorf(err.Error())
+				t.Error(err.Error())
 			}
 			if res != nil {
 				failures := ValidateAXFR(res.Answer, tc.Answer)
