@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/model"
 	api "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -83,7 +84,7 @@ func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 
 	// scrape and parse metrics to get base state
 	m := ScrapeMetrics(t)
-	var tp expfmt.TextParser
+	tp := expfmt.NewTextParser(model.LegacyValidation)
 	base, err := tp.TextToMetricFamilies(strings.NewReader(string(m)))
 	if err != nil {
 		t.Fatalf("Could not parse scraped metrics: %v", err)
