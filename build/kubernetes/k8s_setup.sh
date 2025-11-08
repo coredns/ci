@@ -11,10 +11,7 @@ curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/${KIND
 kind create cluster --image kindest/node:${K8S_VERSION}
 
 # Wait for cluster to be ready
-JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}';
-until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
-  sleep 1;
-done
+kubectl wait --for=condition=Ready nodes --all --timeout=60s >/dev/null 2>&1
 
 # Scale the CoreDNS replicas to simplify testing
 kubectl scale -n kube-system deployment/coredns --replicas=1
