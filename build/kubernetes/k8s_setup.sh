@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -v
 
 # Install kubectl
@@ -11,9 +11,12 @@ curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/${KIND
 kind create cluster --image kindest/node:${K8S_VERSION}
 
 # Wait for cluster to be ready
-JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}';
-until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do
-  sleep 1;
+JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'
+out=''
+until [[ "${out}" =~ 'Ready=True' ]]; do
+  sleep 1
+  out=$(kubectl get nodes -o jsonpath="$JSONPATH")
+  echo "${out}"
 done
 
 # Scale the CoreDNS replicas to simplify testing
