@@ -2,10 +2,10 @@ package k8sdeployment
 
 import (
 	"os/exec"
-	"strings"
 	"testing"
 
 	"github.com/coredns/ci/test/kubernetes"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestConfigMapTranslation(t *testing.T) {
@@ -72,8 +72,8 @@ my.cluster.local:53 {
 		t.Fatalf("error fetching translated corefile: %s", err)
 	}
 
-	if strings.Compare(corefileTranslated, corefileExpected) != 0 {
-		t.Fatalf("failed test: Translation does not match.\nGOT:\n" + corefileTranslated + "\n\nEXPECTED:\n" + corefileExpected)
+	if diff := cmp.Diff(corefileExpected, corefileTranslated); diff != "" {
+		t.Fatalf("failed test: Translation does not match.(-expected, +got):\n%s", diff)
 	}
 
 	// Clean-up by removing kube-dns ConfigMap
