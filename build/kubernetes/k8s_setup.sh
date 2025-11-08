@@ -2,13 +2,13 @@
 set -v
 
 # Install kubectl
-curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+curl -Lo ./kubectl "https://dl.k8s.io/release/${K8S_VERSION}/bin/linux/amd64/kubectl" && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 
 # Install kind
-curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION}/kind-$(uname)-amd64 && chmod +x ./kind && sudo mv ./kind /usr/local/bin/
+curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION}/kind-linux-amd64" && chmod +x ./kind && sudo mv ./kind /usr/local/bin/
 
 # Create a single node cluster
-kind create cluster --image kindest/node:${K8S_VERSION}
+kind create cluster --image "kindest/node:${K8S_VERSION}"
 
 # Wait for cluster to be ready
 JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}';
