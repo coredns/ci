@@ -79,7 +79,6 @@ var autopathTests = []test.Case{
 }
 
 func TestKubernetesAutopath(t *testing.T) {
-
 	// set up server to handle internal zone, to trap *.internal search path in travis environment.
 	internal := `; internal zone info for autopath tests
 internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
@@ -88,8 +87,7 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 	defer upstream.Stop()
 	defer rmFunc()
 
-	corefile :=
-		`    .:53 {
+	corefile := `    .:53 {
         health
         ready
         errors
@@ -126,7 +124,7 @@ internal.		IN	SOA	sns.internal. noc.internal. 2015082541 7200 3600 1209600 3600
 	}
 	err = kubernetes.WaitForClientPodRecord(namespace)
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	for _, tc := range testCases {
