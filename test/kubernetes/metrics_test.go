@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 	"github.com/prometheus/common/model"
 	api "k8s.io/api/core/v1"
@@ -121,9 +122,11 @@ func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 		expectBucketsDelta = map[int]uint64{}
 	}
 
-	// create the expected bucket values by adding deltas to the base state buckets
-	if _, ok := base[metricName]; ok {
-		for i, bucket := range base[metricName].Metric[0].Histogram.Bucket {
+	// create the expected bucket values by adding deltas to the base state buckets.
+	// Look up headless_with_selector explicitly — cluster_ip is now also recorded and
+	// sorts first alphabetically, so Metric[0] is no longer reliable.
+	if baseMetric := metricByServiceKind(base[metricName], "headless_with_selector"); baseMetric != nil {
+		for i, bucket := range baseMetric.Histogram.Bucket {
 			expectBuckets = append(expectBuckets, expectBucket{i, *bucket.CumulativeCount + expectBucketsDelta[i]})
 		}
 	}
@@ -138,12 +141,32 @@ func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 	if _, ok := got[metricName]; !ok {
 		t.Fatalf("Did not find '%v' in scraped metrics.", metricName)
 	}
+	gotMetric := metricByServiceKind(got[metricName], "headless_with_selector")
+	if gotMetric == nil {
+		t.Fatalf("Did not find headless_with_selector service_kind in '%v'", metricName)
+	}
 	for _, eb := range expectBuckets {
-		count := *got[metricName].Metric[0].Histogram.Bucket[eb.n].CumulativeCount
+		count := *gotMetric.Histogram.Bucket[eb.n].CumulativeCount
 		if count != eb.count {
 			t.Errorf("In bucket %v, expected %v, got %v", eb.n, eb.count, count)
 		}
 	}
+}
+
+// metricByServiceKind returns the first dto.Metric in the family whose
+// service_kind label matches the given value, or nil if not found.
+func metricByServiceKind(family *dto.MetricFamily, serviceKind string) *dto.Metric {
+	if family == nil {
+		return nil
+	}
+	for _, m := range family.Metric {
+		for _, l := range m.Label {
+			if l.GetName() == "service_kind" && l.GetValue() == serviceKind {
+				return m
+			}
+		}
+	}
+	return nil
 }
 
 func addUpdateEndpoints(t *testing.T, client *kubernetes.Clientset) {
