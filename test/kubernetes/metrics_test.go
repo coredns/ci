@@ -10,7 +10,6 @@ import (
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
-	"github.com/prometheus/common/model"
 	api "k8s.io/api/core/v1"
 	discovery "k8s.io/api/discovery/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -85,7 +84,11 @@ func testEndpoints(t *testing.T, client *kubernetes.Clientset, slices bool) {
 
 	// scrape and parse metrics to get base state
 	m := ScrapeMetrics(t)
-	tp := expfmt.NewTextParser(model.LegacyValidation)
+	// prometheus/common v0.59.1 (pinned in go.mod) does not yet expose
+	// NewTextParser; stick with the zero-value TextParser, which
+	// defaults to legacy validation, until coredns/coredns#7731 bumps
+	// the common dep.
+	var tp expfmt.TextParser
 	base, err := tp.TextToMetricFamilies(strings.NewReader(string(m)))
 	if err != nil {
 		t.Fatalf("Could not parse scraped metrics: %v", err)
